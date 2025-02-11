@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/pasarela.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="pasarela-contenedor">
+    <h2>Datos de envío</h2>  
+    <div class="pasarela-card">
+        <form method="POST" action="{% url 'MessagePasarela' %}" id="form-pasarela">
+            {% csrf_token %}
+            <input type="hidden" name="carrito_data" id="carrito_data">
+            
+            <div class="form-grid">
+                <!-- Columna izquierda -->
+                <div class="columna-izquierda">
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        {{ form.nombre }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Apellido:</label>
+                        {{ form.apellido }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dirección:</label>
+                        {{ form.direccion }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono:</label>
+                        {{ form.telefono }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correo:</label>
+                        {{ form.email }}
+                    </div>
+                </div>
+
+                <!-- Columna derecha -->
+                <div class="columna-derecha">
+                    <div class="form-group">
+                        <label>Municipio:</label>
+                        {{ form.municipio }}
+                    </div>
+
+                    <div class="form-group payment-methods">
+                        <label>Modo de pago:</label>
+                        <div class="modo-pago">
+                            {{ form.metodo_pago }}
+                        </div>
+                    </div>
+
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>Total</span>
+                            <span class="total" id="total">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-proceder">Proceder al pago</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/pasarela.js' %}"></script>
+{% endblock %}
