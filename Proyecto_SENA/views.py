@@ -1,149 +1,180 @@
-from django.shortcuts import render
-
-# Create your views here.
+from django.shortcuts import render, redirect
+from django.contrib.auth import login as auth_login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .forms import FormularioRegistroUsuario, FormularioContacto, FormularioPasarela
+from .models import (
+    Producto, Inventario, Pedido, ProductosPedido,
+    HistorialPedidos, Contacto
+)
+from django.http import JsonResponse
+from decimal import Decimal
+import json
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.core.paginator import Paginator
 
 def inicio(request):
-    return render(request,'inicio.html')
+    """Vista para la página de inicio"""
+    return render(request, 'inicio.html')
 
 def galeria(request):
-    return render(request,'galeria.html')
+    """Vista para la galería de imágenes"""
+    return render(request, 'galeria.html')
 
 def perfil(request):
+    """Vista para el perfil de usuario"""
     return render(request, 'perfil.html')
 
 def catalogo(request):
+    """Vista para el catálogo de productos"""
     return render(request, 'catalogo.html')
 
 def carrito(request):
+    """Vista para el carrito de compras"""
     return render(request, 'carrito.html')
 
+def manual(request):
+    """Vista para el carrito el manual de usuario"""
+    return render(request, 'manual.html')
 
+def logout_perfil(request):
+    """Función para cerrar sesión"""
+    logout(request)
+    return redirect('inicio')
 
+def register(request):
+    """
+    Vista para el registro de nuevos usuarios.
+    Procesa el formulario de registro y crea nuevas cuentas.
+    """
+    if request.method == "POST":
+        form = FormularioRegistroUsuario(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, "Registro exitoso, Por favor inicia sesión")
+            return redirect('login')
+        else:
+            for field in form.errors:
+                for error in form[field].errors:
+                    messages.error(request, f"{field}: {error}")
+    return render(request, 'perfil.html', {'register_mode': True})
 
-from django.shortcuts import render, redirect  
-from django.contrib.auth import login as auth_login, authenticate, logout
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm  
-from django.contrib import messages  # importo los mensajes para mostrar errores o confirmaciones
-from django.contrib.auth.decorators import login_required  # importo el decorador para proteger vistas
-from .forms import CustomUserCreationForm  # importo mi formulario personalizado de registro
+def login(request):
+    """
+    Vista para el inicio de sesión.
+    Autentica a los usuarios y crea su sesión.
+    """
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+                return redirect('catalogo')
+            else:
+                messages.error(request, "Usuario o contraseña incorrectos")
+        else:
+            messages.error(request, "Usuario o contraseña incorrectos")
+    return render(request, 'login.html', {'register_mode': False})
 
+@login_required(login_url='login')
+def perfil(request):
+    """
+    Vista para gestionar el perfil del usuario.
+    Permite cambiar contraseña y eliminar cuenta.
+    """
+    if request.method == 'POST':
+        if 'delete_account' in request.POST:
+            request.user.delete()
+            messages.success(request, "Cuenta eliminada exitosamente")
+            return redirect('inicio')
+        elif 'change_password' in request.POST:
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                messages.success(request, 'Contraseña actualizada exitosamente')
+                logout(request)
+                return redirect('login')
+            else:
+                for error in password_form.errors.values():
+                    messages.error(request, error[0])
+    else:
+        password_form = PasswordChangeForm(request.user)
 
-
-def logout_perfil(request):  # defino la funcion para cerrar sesion
-    logout(request)  # cierro la sesion del usuario
-    return redirect('inicio')  # redirecciono al inicio
-
-def register(request):  # Función para manejar el registro de nuevos usuarios
-    if request.method == "POST":  # Si el método es POST procesa el formulario
-        form = CustomUserCreationForm(request.POST)  # Crea una instancia del formulario con los datos enviados
-        if form.is_valid():  # Valida que los datos cumplan con los requisitos
-            user = form.save()  # Guarda el nuevo usuario en la base de datos
-            messages.success(request, "Registro exitoso, Por favor inicia sesión")  # Muestra mensaje de éxito
-            return redirect('login')  # Redirecciona al login
-        else:  # Si hay errores en el formulario
-            for field in form.errors:  # Itera sobre cada campo con error
-                for error in form[field].errors:  # Itera sobre cada error del campo
-                    messages.error(request, f"{field}: {error}")  # Muestra mensaje de error específico
-    return render(request, 'perfil.html', {'register_mode': True})  # Renderiza la plantilla de registro
-
-def login(request):  # Función para manejar el inicio de sesión
-    if request.method == "POST":  # Si el método es POST, procesa el formulario
-        form = AuthenticationForm(request, data=request.POST)  # Crea instancia del formulario con los datos
-        if form.is_valid():  # Valida las credenciales
-            username = form.cleaned_data.get('username')  # Obtiene el nombre de usuario
-            password = form.cleaned_data.get('password')  # Obtiene la contraseña
-            user = authenticate(username=username, password=password)  # Autentica al usuario
-            if user is not None:  # Si el usuario existe y las credenciales son correctas
-                auth_login(request, user)  # Inicia la sesión del usuario
-                return redirect('perfil')  # Redirecciona al perfil
-            else:  # Si las credenciales son incorrectas
-                messages.error(request, "Usuario o contraseña incorrectos")  # Muestra mensaje de error
-        else:  # Si el formulario no es válido
-            messages.error(request, "Usuario o contraseña incorrectos")  # Muestra mensaje de error
-    return render(request, 'login.html', {'register_mode': False})  # Renderiza la plantilla de login
-
-@login_required(login_url='login')  # Decorator que requiere inicio de sesión para acceder
-def perfil(request):  # Función para manejar el perfil del usuario
-    if request.method == 'POST':  # Si el método es POST, procesa el formulario
-        if 'delete_account' in request.POST:  # Si se solicita eliminar la cuenta
-            request.user.delete()  # Elimina el usuario
-            messages.success(request, "Cuenta eliminada exitosamente")  # Muestra mensaje de confirmación
-            return redirect('inicio')  # Redirecciona al inicio
-        elif 'change_password' in request.POST:  # Si se solicita cambiar la contraseña
-            password_form = PasswordChangeForm(request.user, request.POST)  # Crea instancia del formulario
-            if password_form.is_valid():  # Valida los datos del formulario
-                user = password_form.save()  # Guarda la nueva contraseña
-                messages.success(request, 'Contraseña actualizada exitosamente')  # Muestra mensaje de éxito
-                logout(request)  # Cierra la sesión del usuario
-                return redirect('login')  # Redirecciona al login
-            else:  # Si hay errores en el formulario
-                for error in password_form.errors.values():  # Itera sobre los errores
-                    messages.error(request, error[0])  # Muestra mensaje de error
-    else:  # Si el método es GET
-        password_form = PasswordChangeForm(request.user)  # Crea formulario vacío
-
-    try:  # Intenta obtener el perfil del usuario
-        profile = request.user.userprofile  # Obtiene el perfil del usuario
-        context = {  # Crea el contexto con los datos necesarios
+    try:
+        profile = request.user.perfilusuario
+        context = {
             'user': request.user,
             'profile': profile,
             'password_form': password_form
         }
-        return render(request, 'perfil.html', context)  # Renderiza la plantilla con el contexto
-    except AttributeError:  # Si no existe el perfil
-        return render(request, 'perfil.html', {'password_form': password_form})  # Renderiza sin datos de perfil
-    
+        return render(request, 'perfil.html', context)
+    except AttributeError:
+        return render(request, 'perfil.html', {'password_form': password_form})
 
-from django.http import JsonResponse
-from .models import Products
-
-def get_products(request): # Función para obtener los productos disponibles
-    products = Products.objects.filter(disponible=True).values( # Filtra los productos disponibles
+def get_products(request):
+    productos = Producto.objects.filter(disponible=True).values(
         'id', 'nombre', 'descripcion', 'precio', 
         'categoria', 'imagen'
     )
-    print("Productos encontrados:", list(products)) # Imprime los productos encontrados
-    return JsonResponse(list(products), safe=False) # Retorna los productos en formato JSON
+    
+    productos_list = list(productos)
+    
+    for producto in productos_list:
+        try:
+            inventario = Inventario.objects.get(producto_id=producto['id'])
+            producto['available_units'] = inventario.unidades_totales 
+        except Inventario.DoesNotExist:
+            producto['available_units'] = 0
+    
+    return JsonResponse(productos_list, safe=False)
 
-
-
-from .forms import ContactForm
-def contact(request):  # Función para manejar el formulario de contacto
-    if request.method == 'POST':  # Si el método es POST, procesa el formulario
-        form = ContactForm(request.POST)  # Crea instancia del formulario con los datos
-        if form.is_valid():  # Valida los datos del formulario
-            form.save()  # Guarda los datos en la base de datos
-            messages.success(request, "Mensaje enviado")  # Muestra mensaje de éxito
-            return redirect('contact')  # Redirecciona a la misma página
-        else:  # Si hay errores en el formulario
-            for field in form.errors:  # Itera sobre cada campo con error
-                for error in form[field].errors:  # Itera sobre cada error del campo
-                    messages.error(request, f"{field}: {error}")  # Muestra mensaje de error específico
-    else:  # Si el método es GET
-        form = ContactForm()  # Crea formulario vacío
-    return render(request, 'inicio.html', {'form': form})  # Renderiza la plantilla con el formulario
-
-
-from decimal import Decimal
-from .models import Order, OrderProducts
-from .forms import PasarelaForm
-import json
+def contact(request):
+    """
+    Vista para procesar el formulario de contacto.
+    Guarda los mensajes de contacto en la base de datos.
+    """
+    if request.method == 'POST':
+        form = FormularioContacto(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Mensaje enviado")
+            return redirect('contact')
+        else:
+            for field in form.errors:
+                for error in form[field].errors:
+                    messages.error(request, f"{field}: {error}")
+    else:
+        form = FormularioContacto()
+    return render(request, 'inicio.html', {'form': form})
 
 def get_datos(user):
-    if hasattr(user, 'userprofile'):
+    """
+    Función auxiliar para obtener datos del usuario.
+    """
+    if hasattr(user, 'perfilusuario'):
         return {
             'nombre': user.first_name,
             'apellido': user.last_name,
             'email': user.email,
-            'telefono': user.userprofile.numero,
-            'direccion': user.userprofile.direccion
+            'telefono': user.perfilusuario.numero,
+            'direccion': user.perfilusuario.direccion
         }
     return {}
 
 @login_required
 def usuario_info(request):
+    """
+    Vista para obtener información del usuario.
+    Retorna un JSON con los datos del perfil.
+    """
     user = request.user
-    user_profile = user.userprofile
+    user_profile = user.perfilusuario
     
     return JsonResponse({
         'usuario': {
@@ -157,8 +188,12 @@ def usuario_info(request):
 
 @login_required
 def pasarela(request):
+    """
+    Vista para procesar el pago y crear pedidos.
+    Maneja la creación de pedidos y sus productos asociados.
+    """
     if request.method == 'POST':
-        form = PasarelaForm(request.POST)
+        form = FormularioPasarela(request.POST)
         if form.is_valid():
             try:
                 carrito_data = request.POST.get('carrito_data')
@@ -175,54 +210,58 @@ def pasarela(request):
                         'message': 'El carrito está vacío'
                     })
 
-                # Crear la orden
-                order = form.save(commit=False)
-                order.user = request.user
-                # Convertir todo a Decimal para evitar errores de tipo
-                order.subtotal = Decimal(str(sum(Decimal(str(item['precio'])) * int(item['cantidad']) for item in carrito)))
-                order.costo_envio = Decimal('3000')
-                order.total = order.subtotal + order.costo_envio
-                order.save()
+                # Crear el pedido
+                pedido = form.save(commit=False)
+                pedido.usuario = request.user
+                pedido.subtotal = Decimal(str(sum(Decimal(str(item['precio'])) * int(item['cantidad']) for item in carrito)))
+                pedido.costo_envio = Decimal('3000')
+                pedido.total = pedido.subtotal + pedido.costo_envio
+                pedido.save()
 
-                # Guardar productos del carrito
+                # Guardar productos del pedido
                 for item in carrito:
-                    producto = Products.objects.get(id=item['id'])
-                    OrderProducts.objects.create(
-                        order=order,
-                        producto=producto,
-                        cantidad=int(item['cantidad']),
-                        precio_unitario=Decimal(str(item['precio'])),
-                        subtotal=Decimal(str(item['precio'])) * int(item['cantidad'])
-                    )
+                    producto = Producto.objects.get(id=item['id'])
+                    cantidad = int(item['cantidad'])
+                        # Actualizar inventario
+                    try:
+                        inventario = Inventario.objects.get(producto=producto)
+                        if inventario.disminuir_stock(cantidad):
+                            ProductosPedido.objects.create(
+                                pedido=pedido,
+                                producto=producto,
+                                cantidad=cantidad,
+                                precio_unitario=Decimal(str(item['precio'])),
+                                subtotal=Decimal(str(item['precio'])) * cantidad
+                            )
+                        else:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': f'No hay suficiente stock para {producto.nombre}'
+                            })
+                    except Inventario.DoesNotExist:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'No hay inventario para {producto.nombre}'
+                        })
                 
                 # Crear registro en el historial
-                OrderHistory.objects.create(
-                    user=request.user,
-                    numero_orden=f"#{order.id}",
+                HistorialPedidos.objects.create(
+                    usuario=request.user,
+                    numero_pedido=f"#{pedido.id}",
                     numero_productos=sum(int(item['cantidad']) for item in carrito),
-                    compra_total=order.total
+                    compra_total=pedido.total
                 )
 
                 return JsonResponse({
                     'status': 'success',
-                    'message': 'Orden creada, espere confirmacion por correo',
-                    'redirect_url': '/catalogo/'
+                    'message': 'Pedido creado, espere confirmación por correo',
+                    'redirect_url': 'catalogo/'
                 })
 
-            except Products.DoesNotExist:
+            except Producto.DoesNotExist:
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Uno o más productos no existen en la base de datos'
-                })
-            except json.JSONDecodeError:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Error al procesar el carrito'
-                })
-            except Exception as e:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': f'Error inesperado: {str(e)}'
                 })
         else:
             return JsonResponse({
@@ -230,18 +269,16 @@ def pasarela(request):
                 'errors': form.errors
             })
 
-    # GET request
-    form = PasarelaForm(initial=get_datos(request.user))
+    form = FormularioPasarela(initial=get_datos(request.user))
     return render(request, 'pasarela.html', {
         'form': form
     })
 
-
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
-from django.conf import settings
-
 def MessagePasarela(request):
+    """
+    Vista para enviar correos de confirmación de pedido.
+    Procesa los datos del pedido y envía un correo al cliente.
+    """
     if request.method == "POST":
         try:
             nombre = request.POST.get('nombre')
@@ -295,14 +332,15 @@ def MessagePasarela(request):
                 'status': 'error',
                 'message': f'Error al procesar el pedido: {str(e)}'
             })
-        
-from .models import OrderHistory
-from django.core.paginator import Paginator
 
 @login_required
 def history(request):
-    orders = OrderHistory.objects.filter(user=request.user).order_by('-fecha_compra')
-    paginator = Paginator(orders, 10)  # 10 órdenes por página
+    """
+    Vista para mostrar el historial de pedidos del usuario.
+    Incluye paginación para mejor navegación.
+    """
+    pedidos = HistorialPedidos.objects.filter(usuario=request.user).order_by('-fecha_compra')
+    paginator = Paginator(pedidos, 10)
     
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

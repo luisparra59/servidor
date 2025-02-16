@@ -1,35 +1,59 @@
-
 from django.contrib import admin
-from .models import UserProfile
+from .models import (
+    PerfilUsuario, Producto, Contacto, Pedido,
+    ProductosPedido, Inventario
+)
 
-# Definimos cómo se mostrará UserProfile en el admin
-class UserProfileAdmin(admin.ModelAdmin):
-    model = UserProfile
-    list_display = ('user', 'numero', 'direccion')  # Campos que se mostrarán en la lista
-admin.site.register(UserProfile, UserProfileAdmin)
+class AdminPerfilUsuario(admin.ModelAdmin):
+    """
+    Configuración de la interfaz administrativa para perfiles de usuario.
+    """
+    model = PerfilUsuario
+    list_display = ('usuario', 'numero', 'direccion')
 
-# Definimos cómo se mostrará Productos en el admin
-from .models import Products
+admin.site.register(PerfilUsuario, AdminPerfilUsuario)
 
-@admin.register(Products)
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'categoria', 'precio', 'disponible') #lo que se muestra en al tabla de products
-    search_fields = ('nombre', 'descripcion') # por lo que se puede buscar
+@admin.register(Producto)
+class AdminProducto(admin.ModelAdmin):
+    """
+    Configuración de la interfaz administrativa para productos.
+    """
+    list_display = ('nombre', 'categoria', 'precio', 'disponible', 'obtener_stock')
+    search_fields = ('nombre', 'descripcion')
+    
+    def obtener_stock(self, obj):
+        return obj.obtener_unidades_disponibles()
+    obtener_stock.short_description = 'Stock Disponible'
 
-from .models import Contact
-class ContactMessages (admin.ModelAdmin):
+class AdminMensajeContacto(admin.ModelAdmin):
+    """
+    Configuración de la interfaz administrativa para mensajes de contacto.
+    """
     list_display = ('nombre', 'email', 'telefono', 'mensaje')
-admin.site.register(Contact, ContactMessages)
 
-from .models import Order, OrderProducts
+admin.site.register(Contacto, AdminMensajeContacto)
 
-class OrderProducts(admin.TabularInline):
-    model = OrderProducts
+class ProductosPedidoInline(admin.TabularInline):
+    """
+    Configuración para mostrar productos dentro de un pedido en el admin.
+    """
+    model = ProductosPedido
     extra = 0
     readonly_fields = ('subtotal',)
 
-@admin.register(Order)
-class OrderPending(admin.ModelAdmin):
-    list_display = ['id', 'user', 'fecha_creacion', 'total', 'estado', 'metodo_pago']
-    inlines = [OrderProducts]
+@admin.register(Pedido)
+class AdminPedido(admin.ModelAdmin):
+    """
+    Configuración de la interfaz administrativa para pedidos.
+    """
+    list_display = ['id', 'usuario', 'fecha_creacion', 'total', 'estado', 'metodo_pago']
+    inlines = [ProductosPedidoInline]
     readonly_fields = ['fecha_creacion', 'subtotal', 'total']
+
+@admin.register(Inventario)
+class AdminInventario(admin.ModelAdmin):
+    """
+    Configuración de la interfaz administrativa para inventario.
+    """
+    list_display = ('producto', 'unidades_totales')
+    search_fields = ('producto__nombre',)

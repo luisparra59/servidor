@@ -58,20 +58,42 @@
 .modo-pago {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 12px;
     padding: 0.5rem 0;
 }
 
-.modo-pago div {
+/* Estilo específico para el contenedor de cada radio button */
+.form-check {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
-.modo-pago input[type="radio"] {
-    width: 1.2rem;
-    height: 1.2rem;
+/* Estilo para los radio buttons */
+.form-check-input {
+    width: 1.2rem !important;
+    height: 1.2rem !important;
+    margin: 0 !important;
+    cursor: pointer;
     accent-color: #4a90e2;
+}
+
+/* Estilo para las etiquetas de los radio buttons */
+.form-check label {
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 1rem;
+}
+
+/* Asegurarse que los inputs de tipo radio no heredan otros estilos */
+input[type="radio"] {
+    padding: 0;
+    border: none;
+    width: auto;
 }
 
 .total-section {
@@ -89,7 +111,7 @@
     color: #333;
 }
 
-.total{
+.total {
     font-size: 1.5rem;
     color: #1abc9c;
 }
@@ -117,7 +139,6 @@
     }
 }
 
-/* Estilos para mensajes de error */
 .error {
     color: #dc2626;
     font-size: 0.875rem;
@@ -172,8 +193,7 @@
     border-radius: 8px;
     margin-top: 1.5rem;
 }
+
 .registrado {
     cursor: not-allowed;
 }
-
-

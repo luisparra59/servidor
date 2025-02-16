@@ -135,7 +135,88 @@ header {
     height: auto;
 }
 
+/* Estilos para el dropdown */
+.nav-user-dropdown {
+    position: relative;
+    display: inline-block;
+}
 
+.nav-user-dropdown > i {
+    font-size: 22px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all .6s;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background-color: var(--bg-color);
+    min-width: 200px;
+    border-radius: 4px;
+    padding: 8px 0;
+    z-index: 1000;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-content.active {
+    display: block;
+}
+
+.dropdown-content a {
+    color: var(--text-color) !important;
+    padding: 8px 16px !important;
+    text-decoration: none;
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    margin: 0 !important;
+    font-size: 14px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--main-color);
+    transform: none !important;
+    color: var(--text-color) !important;
+}
+
+.dropdown-content a i {
+    font-size: 16px !important;
+    color: var(--second-color);
+    margin: 0 !important;
+}
+
+/* Restauramos la flecha del dropdown */
+.dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 15px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid var(--bg-color);
+    filter: drop-shadow(0 -1px 0 rgba(0,0,0,0.1));
+}
+
+@media (max-width: 1070px) {
+    .dropdown-content {
+        position: fixed;
+        top: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 300px;
+    }
+    
+    .dropdown-content::before {
+        right: 50%;
+        transform: translateX(50%);
+    }
+}
 /* Responsive */
 
 @media (max-width: 1610px) {

@@ -52,7 +52,11 @@
                     <div class="form-group payment-methods">
                         <label>Modo de pago:</label>
                         <div class="modo-pago">
-                            {{ form.metodo_pago }}
+                            {% for radio in form.metodo_pago %}
+                            <div class="form-check">
+                                {{ radio }}
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
 
@@ -63,7 +67,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-proceder">Proceder al pago</button>
+                    <button type="submit" class="btn-proceder">Proceder al pedido</button>
                 </div>
             </div>
         </form>

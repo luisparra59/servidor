@@ -16,7 +16,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function filterProducts(category) {
-        return category === "todos" ? productos : productos.filter(p => p.categoria === category);
+        console.log('Filtering by category:', category); // Para debugging
+        if (category === "todos") {
+            return productos;
+        }
+        return productos.filter(p => p.categoria === category);
     }
 
     function displayProducts(products, page) {
@@ -24,24 +28,33 @@ document.addEventListener("DOMContentLoaded", function () {
         const paginatedProducts = products.slice(start, start + ITEMS_PER_PAGE);
         const container = document.getElementById("productos-container");
         container.innerHTML = "";
-
+    
         paginatedProducts.forEach(product => {
+            // Verificar disponibilidad
+            const stockAvailable = product.available_units > 0;
+            const stockText = stockAvailable ? 
+                `<span class="text-success">${product.available_units} unidades disponibles</span>` : 
+                '<span class="text-danger">Agotado</span>';
+    
             container.innerHTML += `
                 <div class="producto" data-categoria="${product.categoria}">
                     <img src="/media/${product.imagen}" alt="${product.nombre}">
                     <h2>${product.nombre}</h2>
                     <p>${product.descripcion}</p>
                     <div class="precio">
-                        <p>$${product.precio}</p>
-                        <button class="btn-comprar btn btn-success" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#productModal"
+                        <p>$${product.precio} ${stockText}</p>
+                        <button class="btn-comprar btn ${stockAvailable ? 'btn-success' : 'btn-secondary'}" 
+                            ${stockAvailable ? `
+                                data-bs-toggle="modal" 
+                                data-bs-target="#productModal"
+                            ` : 'disabled'}
                             data-id="${product.id}"
                             data-title="${product.nombre}"
                             data-description="${product.descripcion}"
                             data-price="${product.precio}"
+                            data-stock="${product.available_units}"
                             data-image="/media/${product.imagen}">
-                            Comprar
+                            ${stockAvailable ? 'Comprar' : 'Agotado'}
                         </button>
                     </div>
                 </div>
@@ -112,7 +125,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const quantityInput = document.getElementById("quantity");
     const addToCartBtn = document.getElementById("addToCartBtn");
 
-    // Función para restablecer el scroll y limpiar el modal
     function resetModalAndScroll() {
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
@@ -123,15 +135,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     modal.addEventListener("show.bs.modal", function (event) {
         const button = event.relatedTarget;
+        const stock = parseInt(button.getAttribute("data-stock"));
+        
         modal.querySelector("#productTitle").textContent = button.getAttribute("data-title");
         modal.querySelector("#productDescription").textContent = button.getAttribute("data-description");
         modal.querySelector("#productPrice").textContent = `$${button.getAttribute("data-price")}`;
         modal.querySelector("#productImage").src = button.getAttribute("data-image");
         modal.setAttribute("data-product-id", button.getAttribute("data-id"));
+        modal.setAttribute("data-stock", stock);
+
+        // Mostrar stock disponible en el modal
+        const stockInfo = document.getElementById("stockInfo");
+        if (stockInfo) {
+            stockInfo.textContent = `Stock disponible: ${stock} unidades`;
+        }
+
+        // Resetear cantidad a 1
         quantityInput.value = 1;
+        quantityInput.max = stock; // Establecer máximo según el stock
     });
 
-    // Manejar el cierre del modal
     modal.addEventListener('hidden.bs.modal', function () {
         resetModalAndScroll();
     });
@@ -139,36 +162,51 @@ document.addEventListener("DOMContentLoaded", function () {
     if (addToCartBtn) {
         addToCartBtn.addEventListener("click", function () {
             const id = modal.getAttribute("data-product-id");
+            const stock = parseInt(modal.getAttribute("data-stock"));
             const cantidad = parseInt(quantityInput.value);
+
+            // Verificar si hay suficiente stock
+            if (cantidad > stock) {
+                alert(`Lo sentimos, solo hay ${stock} unidades disponibles.`);
+                return;
+            }
+
+            // Verificar si ya hay productos en el carrito
+            const existingProduct = carrito.find(p => p.id === id);
+            const cantidadTotal = existingProduct ? 
+                existingProduct.cantidad + cantidad : 
+                cantidad;
+
+            if (cantidadTotal > stock) {
+                alert(`Lo sentimos, no hay suficiente stock. Ya tienes ${existingProduct.cantidad} unidades en el carrito.`);
+                return;
+            }
+
             const producto = {
                 id: id,
                 nombre: modal.querySelector("#productTitle").textContent,
                 precio: parseFloat(modal.querySelector("#productPrice").textContent.replace("$", "")),
                 imagen: modal.querySelector("#productImage").src,
-                cantidad: cantidad
+                cantidad: cantidad,
+                stock: stock
             };
 
-            const existingProduct = carrito.find(p => p.id === id);
             if (existingProduct) {
-                existingProduct.cantidad += cantidad;
+                existingProduct.cantidad = cantidadTotal;
             } else {
                 carrito.push(producto);
             }
 
             localStorage.setItem("carrito", JSON.stringify(carrito));
 
-            // Cerrar el modal usando la API de Bootstrap
             const modalInstance = bootstrap.Modal.getInstance(modal);
             if (modalInstance) {
                 modalInstance.hide();
-                
-                // Forzar la limpieza inmediata del backdrop
                 setTimeout(() => {
                     resetModalAndScroll();
-                }, 150); // Pequeño retraso para asegurar que Bootstrap termine sus animaciones
+                }, 150);
             }
 
-            // Mostrar alerta
             const alert = document.createElement('div');
             alert.className = 'alert alert-success position-fixed top-0 end-0 m-3';
             alert.style.zIndex = '9999';
@@ -180,6 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 2000);
         });
     }
+
     document.getElementById("decrementBtn").addEventListener("click", () => {
         const currentVal = parseInt(quantityInput.value);
         if (currentVal > 1) {
@@ -189,14 +228,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("incrementBtn").addEventListener("click", () => {
         const currentVal = parseInt(quantityInput.value);
-        quantityInput.value = currentVal + 1;
+        const stock = parseInt(modal.getAttribute("data-stock"));
+        if (currentVal < stock) {
+            quantityInput.value = currentVal + 1;
+        } else {
+            alert(`No puedes agregar más unidades. Stock disponible: ${stock}`);
+        }
     });
 
+    // Nueva implementación del manejo de categorías
     document.querySelectorAll(".btn-verde").forEach(button => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function() {
             document.querySelectorAll(".btn-verde").forEach(btn => btn.classList.remove("active"));
             this.classList.add("active");
-            currentCategory = this.className.match(/todos|aseo|comestibles|canastafamiliar|papeleria/)[0];
+            
+            // Nueva forma de obtener la categoría
+            const classes = this.className.split(' ');
+            const categoryClass = classes.find(cls => 
+                ['todos', 'aseo', 'comestibles', 'canastafamiliar', 'papeleria'].includes(cls)
+            );
+            
+            // Mapear las clases a las categorías del modelo
+            const categoryMap = {
+                'todos': 'todos',
+                'aseo': 'aseo',
+                'comestibles': 'comestibles',
+                'canastafamiliar': 'canasta_familiar',
+                'papeleria': 'papeleria'
+            };
+            
+            currentCategory = categoryMap[categoryClass] || 'todos';
             currentPage = 1;
             updateDisplay();
         });

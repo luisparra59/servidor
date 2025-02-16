@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/usuario-info/', views.usuario_info, name='usuario_info'),
     path('message-pasarela/', views.MessagePasarela, name='MessagePasarela'),
     path('historial/', views.history, name='historial'),
+    path('manual/', views.manual, name='manual'),
 ] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
