@@ -198,6 +198,22 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             localStorage.setItem("carrito", JSON.stringify(carrito));
+            
+            // Actualizar el contador del carrito directamente
+            const contador = document.getElementById('contador-carrito');
+            if (contador) {
+                const totalItems = carrito.reduce((total, producto) => total + producto.cantidad, 0);
+                if (totalItems > 0) {
+                    contador.textContent = totalItems;
+                    contador.style.display = 'flex';
+                    // Añadir clase para la animación
+                    contador.classList.remove('notification-pulse');
+                    void contador.offsetWidth; // Forzar reflow
+                    contador.classList.add('notification-pulse');
+                } else {
+                    contador.style.display = 'none';
+                }
+            }
 
             const modalInstance = bootstrap.Modal.getInstance(modal);
             if (modalInstance) {

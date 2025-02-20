@@ -222,7 +222,6 @@ def pasarela(request):
                 for item in carrito:
                     producto = Producto.objects.get(id=item['id'])
                     cantidad = int(item['cantidad'])
-                        # Actualizar inventario
                     try:
                         inventario = Inventario.objects.get(producto=producto)
                         if inventario.disminuir_stock(cantidad):
@@ -255,7 +254,7 @@ def pasarela(request):
                 return JsonResponse({
                     'status': 'success',
                     'message': 'Pedido creado, espere confirmación por correo',
-                    'redirect_url': 'catalogo/'
+                    'redirect_url': '/historial/'
                 })
 
             except Producto.DoesNotExist:

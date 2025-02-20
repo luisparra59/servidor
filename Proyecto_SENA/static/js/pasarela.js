@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.status === 'success') {
                 localStorage.removeItem('carrito');
                 alert('Pedido realizado con éxito, espere confirmación por correo electrónico');
-                window.location.href = '/perfil/';
+                window.location.href = '/historial/';
             } else {
                 alert(data.message || 'Error al procesar la orden');
             }

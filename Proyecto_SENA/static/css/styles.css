@@ -396,7 +396,34 @@ textarea.input {
 .input::placeholder {
     color: aliceblue;
 }
+.cart-icon-container {
+    position: relative;
+    display: inline-block;
+}
 
+.cart-icon-container {
+    position: relative;
+    display: inline-block;
+}
+
+#contador-carrito {
+    background-color: #fa3e3e;
+    color: white;
+    border-radius: 50%;
+    min-width: 15px;
+    height: 15px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    font-weight: bold;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    padding: 0 3px;
+    transform: translateY(-50%);
+}
 /* Responsive */
 @media(max-width: 1610px) {
     section {

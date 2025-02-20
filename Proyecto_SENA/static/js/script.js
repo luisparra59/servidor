@@ -32,4 +32,31 @@ document.addEventListener('DOMContentLoaded', function() {
         event.stopPropagation();
         dropdownContent.classList.toggle('active');
     });
+
+    // Inicializar y configurar el contador del carrito
+    actualizarContador();
+});
+
+// Función para actualizar el contador de carrito en todas las páginas
+function actualizarContador() {
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const contador = document.getElementById('contador-carrito');
+    
+    if (contador) {
+        const totalItems = carrito.reduce((total, producto) => total + producto.cantidad, 0);
+        
+        if (totalItems > 0) {
+            contador.textContent = totalItems;
+            contador.style.display = 'flex';
+        } else {
+            contador.style.display = 'none';
+        }
+    }
+}
+
+// Detectar cambios en localStorage (para sincronizar entre pestañas)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'carrito') {
+        actualizarContador();
+    }
 });

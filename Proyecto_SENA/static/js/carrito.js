@@ -24,11 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h3>${producto.nombre}</h3>
                     <p class="producto-precio">$${(producto.precio * producto.cantidad)}</p>
                     <div class="producto-cantidad">
-                        <!--  <button class="btn btn-outline-secondary btn-cantidad" 
-                                onclick="modificarCantidad('${producto.id}', -1)">-</button> -->
                         <span class="cantidad-valor">Cantidad: ${producto.cantidad}</span>
-                        <!-- <button class="btn btn-outline-secondary btn-cantidad" 
-                                onclick="modificarCantidad('${producto.id}', 1)">+</button> -->
                     </div>
                 </div>
                 <button class="btn-eliminar" onclick="eliminarProducto('${producto.id}')">
@@ -42,9 +38,28 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('subtotal').textContent = `$${subtotal}`;
         document.getElementById('domicilio').textContent = `$${domicilio}`;
         document.getElementById('total').textContent = `$${(subtotal + domicilio)}`;
+        
+        actualizarContadorCarrito();
     }
     
-    // Definir las funciones en el alcance global
+    function actualizarContadorCarrito() {
+        const contador = document.getElementById('contador-carrito');
+        if (!contador) return;
+        
+        const totalItems = carrito.reduce((total, producto) => total + producto.cantidad, 0);
+        
+        if (totalItems > 0) {
+            contador.textContent = totalItems;
+            contador.style.display = 'flex';
+            // Añadir animación al actualizar
+            contador.classList.remove('notification-pulse');
+            void contador.offsetWidth; // Forzar reflow
+            contador.classList.add('notification-pulse');
+        } else {
+            contador.style.display = 'none';
+        }
+    }
+    
     window.modificarCantidad = function(id, cambio) {
         const producto = carrito.find(p => p.id === id);
         if (producto && (producto.cantidad + cambio) > 0) {
@@ -60,6 +75,24 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarCarritoUI();
     };
     
+    window.actualizarContadorCarritoGlobal = function() {
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        const contador = document.getElementById('contador-carrito');
+        if (!contador) return;
+        
+        const totalItems = carrito.reduce((total, producto) => total + producto.cantidad, 0);
+        
+        if (totalItems > 0) {
+            contador.textContent = totalItems;
+            contador.style.display = 'flex';
+            // Añadir animación al actualizar 
+            contador.classList.remove('notification-pulse');
+            void contador.offsetWidth; // Forzar reflow
+            contador.classList.add('notification-pulse');
+        } else {
+            contador.style.display = 'none';
+        }
+    };
     
     actualizarCarritoUI();
 });

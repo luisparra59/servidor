@@ -108,5 +108,4 @@ class FormularioPasarela(forms.ModelForm):
             telefono = datos_limpios.get('telefono')
             if not telefono:
                 self.add_error('telefono', 'El número de teléfono es obligatorio para pagos por Nequi o DaviPlata')
-        
         return datos_limpios

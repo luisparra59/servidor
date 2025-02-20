@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 
@@ -51,7 +52,17 @@
             <p>Dirección: {{direccion}}</p>
             <p>Teléfono: {{telefono}}</p>
             <p>Email: {{email}}</p>
-            <p>Método de pago: {{metodo_pago}}</p>
+            {% if metodo_pago == nequi %}
+                <p>Método de pago: {{metodo_pago}}</p>
+                <img src="{% static 'images/qr2.png' %}" alt="">
+            {% elif metodo_pago == daviplata %}
+                <p>Método de pago: {{metodo_pago}}</p>
+                <img src="{% static 'images/qr1.webp' %}" alt="">
+            {% elif metodo_pago == contra-entrega}
+                <p>Método de pago: {{metodo_pago}}, pagale al repartidor cuando llegue</p>
+            {% else %}
+                <p>Metodo de pago no identificado</p>
+            {% endif %}
         </div>
 
         <div class="productos">
