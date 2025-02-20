@@ -60,3 +60,13 @@ window.addEventListener('storage', function(e) {
         actualizarContador();
     }
 });
+
+function updateCartCount(newCount) {
+    const counter = document.getElementById('contador-carrito');
+    counter.textContent = newCount;
+    counter.classList.add('notification-pulse');
+    
+    setTimeout(() => {
+        counter.classList.remove('notification-pulse');
+    }, 500);
+}

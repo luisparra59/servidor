@@ -224,14 +224,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const alert = document.createElement('div');
-            alert.className = 'alert alert-success position-fixed top-0 end-0 m-3';
+            // Establecemos todos los estilos directamente para mayor control
+            alert.className = 'alert alert-success';
+            alert.style.position = 'fixed';
+            alert.style.top = '80px';
+            alert.style.right = '20px';
             alert.style.zIndex = '9999';
+            alert.style.padding = '10px 15px';
+            alert.style.borderRadius = '4px';
             alert.textContent = 'Producto agregado al carrito';
             document.body.appendChild(alert);
             
             setTimeout(() => {
                 alert.remove();
-            }, 2000);
+            }, 1500);
         });
     }
 
