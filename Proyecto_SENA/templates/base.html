@@ -37,7 +37,7 @@
                 <li><a href="{% url 'historial' %}">Historial</a></li>
             {% else %}
                 <li><a href="{% url 'inicio' %}">Inicio</a></li>
-                <li><a href="{% url 'catalogo' %}">Catalogo</a></li>
+                <li><a href="{% url 'catalogo' %}">Catálogo</a></li>
                 <li><a href="{% url 'galeria' %}">Galeria</a></li>
             {% endif %}
         </ul>
@@ -79,8 +79,37 @@
 
         
     </main>
-    {% endblock %}
-    <footer class="pie">
+    {% endblock %}    
+    <footer id="footer">
+        <div class="col col1">
+            <h3>CoolSite</h3>
+            <p>Made with <span style="color: #BA6573;">❤</span> by Jux</p>
+            <div class="social">
+
+                <a href="https://twitter.com/juxtopposed" target="_blank" class="link">
+                    <img src="{% static 'images/twitter.png' %}" alt="Twitter" />
+                </a>
+                <a href="https://youtube.com/@juxtopposed" target="_blank" class="link">
+                    <img src="{% static 'images/youtube.png' %}" alt="YouTube" />
+                </a>
+            </div>
+            <p style="color: #818181; font-size: smaller">2024 © All Rights Reserved</p>
+        </div>
+        <div class="col col2">
+            <p>About</p>
+            <p>Our mission</p>
+            <p>Privacy Policy</p>
+            <p>Terms of service</p>
+        </div>
+        <div class="col col3">
+            <p>Services</p>
+            <p>Products</p>
+            <p>Join our team</p>
+            <p>Partner with us</p>
+        </div>
+        <div class="backdrop"></div>
+    </footer>
+    <!-- <footer class="pie">
         <div class="pie-contenido">
             <img src="{% static 'images/logo.png' %}" alt="">
             <p>&copy;Copyright The Towers Development 2025</p>
@@ -92,7 +121,7 @@
     AOS.init({
         offset: 100,
         duration: 1450,
-    });
+    }); -->
 </script>
 
     {% block script %} {% endblock %}
