@@ -32,12 +32,12 @@
             <div class="cerrar-icono"><i class="ri-close-line"></i></div>
             {% if user.is_authenticated %}
                 <li><a href="{% url 'inicio' %}">Inicio</a></li>
-                <li><a href="{% url 'catálogo' %}">Catálogo</a></li>
+                <li><a href="{% url 'catalogo' %}">Catálogo</a></li>
                 <li><a href="{% url 'galeria' %}">Galeria</a></li>
                 <li><a href="{% url 'historial' %}">Historial</a></li>
             {% else %}
                 <li><a href="{% url 'inicio' %}">Inicio</a></li>
-                <li><a href="{% url 'catálogo' %}">Catalogo</a></li>
+                <li><a href="{% url 'catalogo' %}">Catálogo</a></li>
                 <li><a href="{% url 'galeria' %}">Galeria</a></li>
             {% endif %}
         </ul>
