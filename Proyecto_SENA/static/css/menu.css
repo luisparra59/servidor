@@ -118,12 +118,6 @@ header {
 }
 
 
-<<<<<<< HEAD
- /* footer 
- .pie {
-    width: 100%;
-    height: 50vh;
-=======
 /* footer */
 
 .pie-pagina {
@@ -230,7 +224,6 @@ header {
 /* .pie {
     width: 100%;
     height: 15vh;
->>>>>>> 0cb4eb2e4418df26f50ed8ab7c53408ced8962b8
     background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
     align-content: center;
 }
