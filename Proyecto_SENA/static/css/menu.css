@@ -164,7 +164,15 @@ header {
 	color: #000;
 	margin-bottom: 2rem;
 }
-
+.pie-contenido {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    align-items: center;
+}
+.pie-contenido img{
+    width: 60%;
+}
 .informacion-contacto,
 .informacion,
 .boletin {
