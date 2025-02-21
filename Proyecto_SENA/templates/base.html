@@ -10,6 +10,7 @@
     <!-- Iconos -->
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Fuentes de google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,35 +81,50 @@
         
     </main>
     {% endblock %}    
-    <footer id="footer">
-        <div class="col col1">
-            <h3>CoolSite</h3>
-            <p>Made with <span style="color: #BA6573;">❤</span> by Jux</p>
-            <div class="social">
+    <footer class="pie-pagina">
+        <div class="contenedor contenedor-pie-pagina">
+            <div class="menu-pie-pagina">
+                <div class="informacion-contacto">
+                    <p class="titulo-pie-pagina">Información de Contacto</p>
+                    <ul>
+                        <li><i class="fa-solid fa-location-dot"></i> Calle 15 #8-45, Neiva, Huila</li>
+                        <li><i class="fa-solid fa-phone"></i> (608) 865-4321</li>
+                        <li><i class="fa-solid fa-envelope"></i> info@renuevahogarmuebles.com</li>
+                    </ul>
+                    <div class="iconos-sociales">
+                        <span class="facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </span>
+                        <span class="instagram">
+                            <i class="fa-brands fa-instagram"></i>
+                        </span>
+                        <span class="twitter">
+                            <i class="fa-brands fa-twitter"></i>
+                        </span>
+                        <span class="youtube">
+                            <i class="fa-brands fa-youtube"></i>
+                        </span>
+                    </div>
+                </div>
 
-                <a href="https://twitter.com/juxtopposed" target="_blank" class="link">
-                    <img src="{% static 'images/twitter.png' %}" alt="Twitter" />
-                </a>
-                <a href="https://youtube.com/@juxtopposed" target="_blank" class="link">
-                    <img src="{% static 'images/youtube.png' %}" alt="YouTube" />
-                </a>
+                <div class="informacion">
+                    <p class="titulo-pie-pagina">Enlaces Rápidos</p>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="#">Productos</a></li>
+                        <li><a href="#">Acerca de Nosotros</a></li>
+                        <li><a href="#">Contáctanos</a></li>
+                    </ul>
+                </div>
             </div>
-            <p style="color: #818181; font-size: smaller">2024 © All Rights Reserved</p>
         </div>
-        <div class="col col2">
-            <p>About</p>
-            <p>Our mission</p>
-            <p>Privacy Policy</p>
-            <p>Terms of service</p>
+
+        <div class="derechos-autor">
+            <p>
+                &copy; 2025 Renueva Hogar - Todos los derechos reservados
+            </p>
         </div>
-        <div class="col col3">
-            <p>Services</p>
-            <p>Products</p>
-            <p>Join our team</p>
-            <p>Partner with us</p>
-        </div>
-        <div class="backdrop"></div>
-    </footer>
+    </footer>
     <!-- <footer class="pie">
         <div class="pie-contenido">
             <img src="{% static 'images/logo.png' %}" alt="">
