@@ -15,6 +15,8 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.contrib.staticfiles import finders
+import os
 
 def inicio(request):
     """Vista para la página de inicio"""
@@ -254,9 +256,9 @@ def pasarela(request):
                 return JsonResponse({
                     'status': 'success',
                     'message': 'Pedido creado, espere confirmación por correo',
-                    'redirect_url': '/historial/'
+                    'redirect': 'historial/'
                 })
-
+            
             except Producto.DoesNotExist:
                 return JsonResponse({
                     'status': 'error',
@@ -316,6 +318,17 @@ def MessagePasarela(request):
                 settings.EMAIL_HOST_USER,
                 [email]
             )
+
+            if metodo_pago == 'nequi':
+                qr_path = finders.find('images/QR-Nequi.jpg')
+                if qr_path:
+                    with open(qr_path, 'rb') as f:
+                        email_message.attach('qr_nequi.jpg', f.read(), 'image/png')
+            elif metodo_pago == 'daviplata':
+                qr_path = finders.find('images/QR-DaviPlata.jpg')
+                if qr_path:
+                    with open(qr_path, 'rb') as f:
+                        email_message.attach('qr_daviplata.jpg', f.read(), 'image/webp')
             
             email_message.content_subtype = "html"
             email_message.send()
