@@ -24,33 +24,51 @@
                 {% endfor %}
             </div>
             {% endif %}
-            <div class="wrapper login-wrapper">
+            <div class="wrapper register-wrapper">
                 <div class="form-header">
                     <div class="titles">
-                        <div class="title-login">Iniciar Sesión</div>
+                        <div class="title-login">Registro</div>
                     </div>
                 </div>
-                <form method="POST" action="{% url 'login' %}">
+                <form method="POST" action="{% url 'register' %}">
                     {% csrf_token %}
                     <div class="input-box">
-                        <input type="text" class="input-field" id="log-email" name="username" required>
-                        <label for="log-email" class="label">Usuario:</label>
+                        <input type="text" class="input-field" id="reg-name" name="username" required>
+                        <label for="reg-name" class="label">Nombre Completo:</label>
+                        <i class='bx bx-user icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="tel" class="input-field" id="reg-phone" name="numero" required>
+                        <label for="reg-phone" class="label">Teléfono:</label>
+                        <i class='bx bx-phone icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" class="input-field" id="reg-address" name="direccion" required>
+                        <label for="reg-address" class="label">Dirección:</label>
+                        <i class='bx bx-map icon'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="email" class="input-field" id="reg-email" name="email" required>
+                        <label for="reg-email" class="label">Correo Electrónico:</label>
                         <i class='bx bx-envelope icon'></i>
                     </div>
                     <div class="input-box">
-                        <input type="password" class="input-field" id="log-pass" name="password" required>
-                        <label for="log-pass" class="label">Contraseña: </label>
+                        <input type="password" class="input-field" id="reg-pass" name="password1" required>
+                        <label for="reg-pass" class="label">Contraseña:</label>
                         <i class='bx bx-lock-alt icon'></i>
                     </div>
-                    <div class="form-cols">
-                            <a href="#">¿Olvidaste tu contraseña?</a>
-                    </div>
                     <div class="input-box">
-                        <button type="submit" class="btn-submit" id="SignInBtn">Iniciar Sesión <i
-                                class='bx bx-log-in'></i></button>
+                        <input type="password" class="input-field" id="reg-pass" name="password2" required>
+                        <label for="reg-pass" class="label">Confirmar Contraseña:</label>
+                        <i class='bx bx-lock-alt icon'></i>
+                    </div>
+
+                    <div class="input-box">
+                        <button type="submit" class="btn-submit" id="SignUpBtn">Registrarse <i
+                                class='bx bx-user-plus'></i></button>
                     </div>
                     <div class="switch-form">
-                        <span>¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate</a></span>
+                        <span>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión</a></span>
                     </div>
                 </form>
             </div>

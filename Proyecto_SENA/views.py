@@ -62,7 +62,7 @@ def register(request):
             for field in form.errors:
                 for error in form[field].errors:
                     messages.error(request, f"{field}: {error}")
-    return render(request, 'perfil.html', {'register_mode': True})
+    return render(request, 'register.html', {'register_mode': True})
 
 def login(request):
     """
