@@ -119,9 +119,25 @@ header {
 
 
 /* footer */
+/* .pie-pagina {
+	background-color: var(--color-primario);
+}
+
+.contenedor-pie-pagina {
+	display: flex;
+	flex-direction: column;
+	gap: 4rem;
+	padding: 3rem;
+}
+
+.menu-pie-pagina {
+	display: flex;
+	justify-content: space-around;
+} */
 
 .pie-pagina {
-	background-color: var(--color-primario);
+	/* background-image: linear-gradient(60deg, #64b3f4 0%, #c2e59c 100%); */
+    background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
 }
 
 .contenedor-pie-pagina {
@@ -140,7 +156,7 @@ header {
 	font-weight: 600;
 	font-size: 1.6rem;
 	text-transform: uppercase;
-	color: #fff;
+	color: #000;
 	margin-bottom: 2rem;
 }
 
@@ -171,12 +187,12 @@ header {
 .informacion-contacto ul li i {
 	margin-right: 1rem;
 	min-width: 2rem;
-	color: #fff;
+	color: #000;
 }
 
 .informacion ul li a {
 	text-decoration: none;
-	color: #fff;
+	color: #000;
 	font-weight: 300;
 	transition: color 0.3s ease;
 }
@@ -214,12 +230,11 @@ header {
 	background-color: #3b5998;
 }
 
-.twitter {
-	background-color: #00acee;
+.whattsapp {
+	background-color: green;
 }
-
-.youtube {
-	background-color: #c4302b;
+.derechos-autor {
+    text-align: center;
 }
 /* .pie {
     width: 100%;
