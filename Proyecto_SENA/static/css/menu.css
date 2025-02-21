@@ -151,6 +151,11 @@ header {
 	display: flex;
 	justify-content: space-around;
 }
+@media (max-width: 680px) {
+    .menu-pie-pagina {
+        flex-direction: column;
+    }
+}
 
 .titulo-pie-pagina {
 	font-weight: 600;
