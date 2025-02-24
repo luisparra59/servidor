@@ -274,7 +274,7 @@ id/media/
 
 .pytest_cache/
 .ipython/
-.env
+# .env
 .envs/*
 !.envs/.local/
 !.envs/.local_keys/
