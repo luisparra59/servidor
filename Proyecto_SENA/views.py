@@ -62,7 +62,9 @@ def register(request):
             for field in form.errors:
                 for error in form[field].errors:
                     messages.error(request, f"{field}: {error}")
-    return render(request, 'register.html', {'register_mode': True})
+    else:
+        form = FormularioRegistroUsuario()
+    return render(request, 'register.html', {'register_mode': True, 'form': form})
 
 def login(request):
     """
@@ -413,3 +415,70 @@ def cambiar_contrasena(request, uidb64, token):
 
 def confirmacion_contrasena(request):
     return render(request, "cambio_contrasena.html")
+
+
+from .forms import FormularioCompletarPerfil
+from .models import PerfilUsuario
+def completar_perfil(request):
+    """
+    Vista para completar el perfil después del registro con Google.
+    """
+    if request.method == 'POST':
+        form = FormularioCompletarPerfil(request.POST)
+        if form.is_valid():
+            # Verificar si ya existe un perfil
+            try:
+                perfil = PerfilUsuario.objects.get(usuario=request.user)
+                perfil.numero = form.cleaned_data['numero']
+                perfil.direccion = form.cleaned_data['direccion']
+                perfil.save()
+            except PerfilUsuario.DoesNotExist:
+                # Crear nuevo perfil si no existe
+                PerfilUsuario.objects.create(
+                    usuario=request.user,
+                    numero=form.cleaned_data['numero'],
+                    direccion=form.cleaned_data['direccion']
+                )
+            
+            messages.success(request, "Perfil completado exitosamente")
+            
+            # Redirigir a donde estaba intentando ir o al catálogo
+            next_url = request.session.get('next', 'catalogo')
+            if 'next' in request.session:
+                del request.session['next']
+            
+            return redirect(next_url)
+    else:
+        # Si el usuario ya tiene perfil, prellenamos el formulario
+        initial_data = {}
+        try:
+            perfil = PerfilUsuario.objects.get(usuario=request.user)
+            initial_data = {
+                'numero': perfil.numero,
+                'direccion': perfil.direccion
+            }
+        except PerfilUsuario.DoesNotExist:
+            pass
+        
+        form = FormularioCompletarPerfil(initial=initial_data)
+    
+    return render(request, 'completar_perfil.html', {'form': form})
+
+def custom_login_redirect(request):
+    """Función para redirigir al usuario después del login, verificando si necesita completar el perfil"""
+    if request.user.is_authenticated:
+        try:
+            # Verificar si ya existe un perfil
+            PerfilUsuario.objects.get(usuario=request.user)
+        except PerfilUsuario.DoesNotExist:
+            # Crear un perfil vacío si no existe
+            PerfilUsuario.objects.create(
+                usuario=request.user,
+                numero='',
+                direccion=''
+            )
+            # Redirigir al formulario de completar perfil
+            return redirect('completar_perfil')
+    
+    # Redirigir al catálogo si todo está en orden
+    return redirect('catalogo')

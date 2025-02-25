@@ -282,5 +282,5 @@ id/media/
 
 
 # Key HTTPS
-cert.crt
-cert.key
+*.crt
+*.key

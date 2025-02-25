@@ -41,6 +41,8 @@ urlpatterns = [
     path('restablecer/', views.restablecer, name='restablecer'),
     path('cambiar_contrasena/<uidb64>/<token>/', views.cambiar_contrasena, name='cambiar_contrasena'),
     path('confirmacion_contrasena/', views.confirmacion_contrasena, name='confirmacion_contrasena'), 
+    path('completar-perfil/', views.completar_perfil, name='completar_perfil'),
+    path('auth/redirect/', views.custom_login_redirect, name='custom_login_redirect'),
 ] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

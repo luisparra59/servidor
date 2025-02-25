@@ -16,6 +16,15 @@ class FormularioRegistroUsuario(UserCreationForm):
         model = User
         fields = ("username", "email", "password1", "password2")
 
+    def clean_email(self):
+        """
+        Valida que el correo electrónico no esté ya en uso.
+        """
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo electrónico ya está registrado. Por favor utiliza otro o recupera tu contraseña.")
+        return email
+
     def save(self, commit=True):
         usuario = super().save(commit=False)
         usuario.email = self.cleaned_data["email"]
@@ -27,6 +36,25 @@ class FormularioRegistroUsuario(UserCreationForm):
                 direccion=self.cleaned_data.get('direccion')
             )
         return usuario
+    
+class FormularioCompletarPerfil(forms.Form):
+    """
+    Formulario para completar información del perfil después del registro con Google.
+    """
+    numero = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tu número de teléfono...'
+        })
+    )
+    direccion = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tu dirección completa...'
+        })
+    )
 
 class FormularioContacto(forms.ModelForm):
     """
