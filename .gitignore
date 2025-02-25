@@ -279,3 +279,8 @@ id/media/
 !.envs/.local/
 !.envs/.local_keys/
 .dir-locals.el
+
+
+# Key HTTPS
+cert.crt
+cert.key

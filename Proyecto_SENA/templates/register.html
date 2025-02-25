@@ -70,6 +70,14 @@
                     <div class="switch-form">
                         <span>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión</a></span>
                     </div>
+                    <div class="social-login">
+                        <p class="text-center">O inicia sesión con:</p>
+                        <div class="social-buttons text-center">
+                            <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-outline-primary">
+                                <i class='bx bxl-google'></i> Google
+                            </a>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
