@@ -37,6 +37,9 @@ urlpatterns = [
     path('message-pasarela/', views.MessagePasarela, name='MessagePasarela'),
     path('historial/', views.history, name='historial'),
     path('manual/', views.manual, name='manual'),
+    path('restablecer/', views.restablecer, name='restablecer'),
+    path('cambiar_contrasena/<uidb64>/<token>/', views.cambiar_contrasena, name='cambiar_contrasena'),
+    path('confirmacion_contrasena/', views.confirmacion_contrasena, name='confirmacion_contrasena'), 
 ] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

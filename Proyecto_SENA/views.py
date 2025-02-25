@@ -358,3 +358,58 @@ def history(request):
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'historial.html', {'page_obj': page_obj})
+
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+
+def restablecer(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        user = User.objects.filter(email=email).first()
+        if user:
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            enlace = request.build_absolute_uri(f"/cambiar_contrasena/{uid}/{token}/")
+            send_mail(
+                'Restablecer contraseña',
+                f'Haz clic en el siguiente en enlace para restablecer tu contraseña {enlace}',
+                'TiendaLuigui1@gmail.com',
+                [email], 
+                fail_silently=False
+            )
+            messages.success(request, "Se ah enviado un enlace de restablecimiento de contraseña a su correo")
+            return redirect('login')
+        else:
+            messages.success(request, "No se encontro algun usuario registrado con ese correo")
+        return redirect('restablecer')
+    return render(request, 'email_restablecer.html')
+
+def cambiar_contrasena(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))  
+        user = User.objects.get(pk=uid) 
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    
+    if user and default_token_generator.check_token(user, token):
+        if request.method == "POST":
+            nueva_contrasena = request.POST.get("password")
+            
+            if not nueva_contrasena:
+                messages.error(request, "La contraseña no puede estar vacía")
+                return render(request, "email_contrasena.html")
+                
+            
+            user.set_password(nueva_contrasena)
+            user.save()
+            
+            return redirect('confirmacion_contrasena')
+        
+        return render(request, "email_contrasena.html")
+    return redirect("login")
+
+def confirmacion_contrasena(request):
+    return render(request, "cambio_contrasena.html")

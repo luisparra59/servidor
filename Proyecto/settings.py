@@ -41,58 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Proyecto_SENA',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
 ]
-
-SITE_ID = 1
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend'
-]
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': env("ALL_AUTH_CLIENT_ID"),
-            'secret': env("ALL_AUTH_SECRET"),
-            'key': ''
-        },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    }
-}
-
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'  
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_USERNAME_REQUIRED = False
-
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
-SOCIALACCOUNT_AUTO_SIGNUP = False  
-LOGIN_URL = '/accounts/login/'
-
-SOCIALACCOUNT_FORMS = {
-    'signup': 'Proyecto_SENA.forms.CustomSocialSignupForm'
-}
-
-ACCOUNT_FORMS = {
-    'login': 'Proyecto_SENA.forms.CustomLoginForm',
-    'signup': 'Proyecto_SENA.forms.CustomSignupForm'
-}
-# ACCOUNT_ADAPTER = 'django.contrib.auth.adapters.DefaultAccountAdapter'
-# SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
 
 # Configuración mejorada de Jazzmin
 JAZZMIN_SETTINGS = {
@@ -222,7 +171,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'Proyecto.urls'
@@ -299,5 +247,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = 'TiendaLuigui1@gmail.com'
+EMAIL_HOST_PASSWORD = 'ulbi pibx gezq oqdw'
