@@ -4,11 +4,42 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentCategory = "todos";
     let productos = [];
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    
+    // Elementos del DOM para la búsqueda
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const searchForm = document.querySelector("form[role='search']");
 
-    async function fetchProducts() {
+    // Añadir evento para el formulario de búsqueda
+    if (searchForm) {
+        searchForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Evita que el formulario se envíe normalmente
+            const query = searchInput.value.trim();
+            fetchProducts(query);
+        });
+    }
+
+    // Función unificada para obtener productos
+    async function fetchProducts(query = "") {
         try {
-            const response = await fetch("/api/productos/");
-            productos = await response.json();
+            const url = `/api/productos/?buscar=${query}`;
+            console.log("Realizando búsqueda con URL:", url);
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log("Datos recibidos del servidor:", data);
+            
+            // Actualizar la variable global de productos
+            productos = data;
+            
+            // Resetear a la primera página cuando se realiza una búsqueda
+            currentPage = 1;
+            
+            // Actualizar la visualización
             updateDisplay();
         } catch (error) {
             console.error("Error al cargar productos:", error);
@@ -16,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function filterProducts(category) {
-        console.log('Filtering by category:', category); // Para debugging
+        console.log('Filtering by category:', category);
         if (category === "todos") {
             return productos;
         }
@@ -27,13 +58,24 @@ document.addEventListener("DOMContentLoaded", function () {
         const start = (page - 1) * ITEMS_PER_PAGE;
         const paginatedProducts = products.slice(start, start + ITEMS_PER_PAGE);
         const container = document.getElementById("productos-container");
+        
+        if (!container) {
+            console.error("No se encontró el contenedor de productos");
+            return;
+        }
+        
         container.innerHTML = "";
+        
+        if (products.length === 0) {
+            container.innerHTML = "<p class='text-center w-100 p-5'>No se encontraron productos.</p>";
+            return;
+        }
     
         paginatedProducts.forEach(product => {
             // Verificar disponibilidad
-            const stockAvailable = product.available_units > 0;
+            const stockAvailable = product.inventario > 0;
             const stockText = stockAvailable ? 
-                `<span class="text-success">${product.available_units} unidades disponibles</span>` : 
+                `<span class="text-success">${product.inventario} unidades disponibles</span>` : 
                 '<span class="text-danger">Agotado</span>';
     
             container.innerHTML += `
@@ -52,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             data-title="${product.nombre}"
                             data-description="${product.descripcion}"
                             data-price="${product.precio}"
-                            data-stock="${product.available_units}"
+                            data-stock="${product.inventario}"
                             data-image="/media/${product.imagen}">
                             ${stockAvailable ? 'Comprar' : 'Agotado'}
                         </button>
@@ -65,7 +107,18 @@ document.addEventListener("DOMContentLoaded", function () {
     function updatePagination(products) {
         const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
         const paginationContainer = document.getElementById("pagination");
+        
+        if (!paginationContainer) {
+            console.error("No se encontró el contenedor de paginación");
+            return;
+        }
+        
         paginationContainer.innerHTML = "";
+
+        // Si no hay productos, no mostrar paginación
+        if (products.length === 0) {
+            return;
+        }
 
         // Botón "Anterior"
         const prevButton = document.createElement("li");
@@ -121,6 +174,34 @@ document.addEventListener("DOMContentLoaded", function () {
         updatePagination(filteredProducts);
     }
 
+    // Configuración de eventos para categorías
+    document.querySelectorAll(".btn-verde").forEach(button => {
+        button.addEventListener("click", function() {
+            document.querySelectorAll(".btn-verde").forEach(btn => btn.classList.remove("active"));
+            this.classList.add("active");
+            
+            // Nueva forma de obtener la categoría
+            const classes = this.className.split(' ');
+            const categoryClass = classes.find(cls => 
+                ['todos', 'aseo', 'comestibles', 'canastafamiliar', 'papeleria'].includes(cls)
+            );
+            
+            // Mapear las clases a las categorías del modelo
+            const categoryMap = {
+                'todos': 'todos',
+                'aseo': 'aseo',
+                'comestibles': 'comestibles',
+                'canastafamiliar': 'canasta_familiar',
+                'papeleria': 'papeleria'
+            };
+            
+            currentCategory = categoryMap[categoryClass] || 'todos';
+            currentPage = 1;
+            updateDisplay();
+        });
+    });
+
+    // Configuración del modal y otros eventos del carrito
     const modal = document.getElementById("productModal");
     const quantityInput = document.getElementById("quantity");
     const addToCartBtn = document.getElementById("addToCartBtn");
@@ -133,31 +214,35 @@ document.addEventListener("DOMContentLoaded", function () {
         backdrops.forEach(backdrop => backdrop.remove());
     }
 
-    modal.addEventListener("show.bs.modal", function (event) {
-        const button = event.relatedTarget;
-        const stock = parseInt(button.getAttribute("data-stock"));
-        
-        modal.querySelector("#productTitle").textContent = button.getAttribute("data-title");
-        modal.querySelector("#productDescription").textContent = button.getAttribute("data-description");
-        modal.querySelector("#productPrice").textContent = `$${button.getAttribute("data-price")}`;
-        modal.querySelector("#productImage").src = button.getAttribute("data-image");
-        modal.setAttribute("data-product-id", button.getAttribute("data-id"));
-        modal.setAttribute("data-stock", stock);
-
-        // Mostrar stock disponible en el modal
-        const stockInfo = document.getElementById("stockInfo");
-        if (stockInfo) {
-            stockInfo.textContent = `Stock disponible: ${stock} unidades`;
-        }
-
-        // Resetear cantidad a 1
-        quantityInput.value = 1;
-        quantityInput.max = stock; // Establecer máximo según el stock
-    });
-
-    modal.addEventListener('hidden.bs.modal', function () {
-        resetModalAndScroll();
-    });
+    if (modal) {
+        modal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            const stock = parseInt(button.getAttribute("data-stock"));
+            
+            modal.querySelector("#productTitle").textContent = button.getAttribute("data-title");
+            modal.querySelector("#productDescription").textContent = button.getAttribute("data-description");
+            modal.querySelector("#productPrice").textContent = `$${button.getAttribute("data-price")}`;
+            modal.querySelector("#productImage").src = button.getAttribute("data-image");
+            modal.setAttribute("data-product-id", button.getAttribute("data-id"));
+            modal.setAttribute("data-stock", stock);
+    
+            // Mostrar stock disponible en el modal
+            const stockInfo = document.getElementById("stockInfo");
+            if (stockInfo) {
+                stockInfo.textContent = `Stock disponible: ${stock} unidades`;
+            }
+    
+            // Resetear cantidad a 1
+            if (quantityInput) {
+                quantityInput.value = 1;
+                quantityInput.max = stock; // Establecer máximo según el stock
+            }
+        });
+    
+        modal.addEventListener('hidden.bs.modal', function () {
+            resetModalAndScroll();
+        });
+    }
 
     if (addToCartBtn) {
         addToCartBtn.addEventListener("click", function () {
@@ -241,49 +326,27 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    document.getElementById("decrementBtn").addEventListener("click", () => {
-        const currentVal = parseInt(quantityInput.value);
-        if (currentVal > 1) {
-            quantityInput.value = currentVal - 1;
-        }
-    });
-
-    document.getElementById("incrementBtn").addEventListener("click", () => {
-        const currentVal = parseInt(quantityInput.value);
-        const stock = parseInt(modal.getAttribute("data-stock"));
-        if (currentVal < stock) {
-            quantityInput.value = currentVal + 1;
-        } else {
-            alert(`No puedes agregar más unidades. Stock disponible: ${stock}`);
-        }
-    });
-
-    // Nueva implementación del manejo de categorías
-    document.querySelectorAll(".btn-verde").forEach(button => {
-        button.addEventListener("click", function() {
-            document.querySelectorAll(".btn-verde").forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            
-            // Nueva forma de obtener la categoría
-            const classes = this.className.split(' ');
-            const categoryClass = classes.find(cls => 
-                ['todos', 'aseo', 'comestibles', 'canastafamiliar', 'papeleria'].includes(cls)
-            );
-            
-            // Mapear las clases a las categorías del modelo
-            const categoryMap = {
-                'todos': 'todos',
-                'aseo': 'aseo',
-                'comestibles': 'comestibles',
-                'canastafamiliar': 'canasta_familiar',
-                'papeleria': 'papeleria'
-            };
-            
-            currentCategory = categoryMap[categoryClass] || 'todos';
-            currentPage = 1;
-            updateDisplay();
+    if (document.getElementById("decrementBtn")) {
+        document.getElementById("decrementBtn").addEventListener("click", () => {
+            const currentVal = parseInt(quantityInput.value);
+            if (currentVal > 1) {
+                quantityInput.value = currentVal - 1;
+            }
         });
-    });
+    }
 
+    if (document.getElementById("incrementBtn")) {
+        document.getElementById("incrementBtn").addEventListener("click", () => {
+            const currentVal = parseInt(quantityInput.value);
+            const stock = parseInt(modal.getAttribute("data-stock"));
+            if (currentVal < stock) {
+                quantityInput.value = currentVal + 1;
+            } else {
+                alert(`No puedes agregar más unidades. Stock disponible: ${stock}`);
+            }
+        });
+    }
+
+    // Cargar productos al inicio
     fetchProducts();
 });

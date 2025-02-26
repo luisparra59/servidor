@@ -21,6 +21,16 @@
             <button class="btn-verde comestibles">Comestibles</button>
             <button class="btn-verde canastafamiliar">Canasta Familiar</button>
             <button class="btn-verde papeleria">Papelería</button>
+            
+            <form class="d-flex" role="search" method="GET">
+                <div class="input-group">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" 
+                           id="searchInput" name="buscar" value="{{request.GET.buscar}}">
+                    <button class="btn btn-outline-success" type="submit" id="searchButton">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </form>       
         </div>
 
         <div class="productos-grid" id="productos-container">

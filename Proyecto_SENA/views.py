@@ -17,6 +17,8 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib.staticfiles import finders
 import os
+from .models import Producto
+from django.db import models 
 
 def inicio(request):
     """Vista para la página de inicio"""
@@ -32,7 +34,51 @@ def perfil(request):
 
 def catalogo(request):
     """Vista para el catálogo de productos"""
-    return render(request, 'catalogo.html')
+    query = request.GET.get('buscar', '')  # Obtiene el valor del input de búsqueda
+    productos = Producto.objects.filter()
+
+    if query:
+        productos = productos.filter(nombre__icontains=query)  # Filtra por nombre
+
+    return render(request, 'catalogo.html', {'productos': productos, 'query': query})
+
+def api_productos(request):
+    """
+    Vista para obtener productos en formato JSON, con soporte para búsqueda.
+    """
+    query = request.GET.get('buscar', '')  # Obtiene el término de búsqueda
+    productos = Producto.objects.filter(disponible=True)
+
+    if query:
+        # Búsqueda más completa: por nombre o descripción
+        productos = productos.filter(
+            models.Q(nombre__icontains=query) | 
+            models.Q(descripcion__icontains=query)
+        )
+
+    # Lista para almacenar los productos con información de inventario
+    productos_con_inventario = []
+    
+    for producto in productos:
+        producto_dict = {
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'descripcion': producto.descripcion,
+            'precio': str(producto.precio),
+            'categoria': producto.categoria,
+            'imagen': str(producto.imagen),
+        }
+        
+        # Obtener información de inventario
+        try:
+            inventario = Inventario.objects.get(producto_id=producto.id)
+            producto_dict['inventario'] = inventario.unidades_totales
+        except Inventario.DoesNotExist:
+            producto_dict['inventario'] = 0
+            
+        productos_con_inventario.append(producto_dict)
+
+    return JsonResponse(productos_con_inventario, safe=False)
 
 def carrito(request):
     """Vista para el carrito de compras"""
@@ -132,9 +178,9 @@ def get_products(request):
     for producto in productos_list:
         try:
             inventario = Inventario.objects.get(producto_id=producto['id'])
-            producto['available_units'] = inventario.unidades_totales 
+            producto['inventario'] = inventario.unidades_totales 
         except Inventario.DoesNotExist:
-            producto['available_units'] = 0
+            producto['inventario'] = 0
     
     return JsonResponse(productos_list, safe=False)
 from django.core.mail import send_mail

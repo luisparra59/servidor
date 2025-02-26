@@ -68,7 +68,7 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
-
+        
 class Inventario(models.Model):
     """
     Modelo para gestionar el inventario de cada producto.

@@ -136,24 +136,44 @@ header {
 } */
 
 .pie-pagina {
-	/* background-image: linear-gradient(60deg, #64b3f4 0%, #c2e59c 100%); */
     background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
 }
 
 .contenedor-pie-pagina {
 	display: flex;
 	flex-direction: column;
-	gap: 4rem;
-	padding: 3rem;
+	gap: 3rem;
+	padding: 1rem;
 }
 
 .menu-pie-pagina {
 	display: flex;
-	justify-content: space-around;
+    gap: 5rem;
+	/* justify-content: space-evenly; */
 }
 @media (max-width: 680px) {
     .menu-pie-pagina {
         flex-direction: column;
+    }
+}
+@media (max-width: 1000px) {
+    .menu-pie-pagina {
+        flex-direction: column;
+    }
+    .menu-pie-pagina {
+        display: flex;
+        gap: 5rem;
+        justify-content: space-evenly; 
+    }
+    .informacion-contacto{
+        padding-left: 7rem;
+    }
+}
+@media (min-width: 1600px) {
+    .menu-pie-pagina {
+        display: flex;
+        gap: 5rem;
+        justify-content: space-evenly; 
     }
 }
 
@@ -179,7 +199,9 @@ header {
 	display: flex;
 	flex-direction: column;
 }
-
+.informacion{
+    padding-left: 6rem;
+}
 .informacion-contacto ul,
 .informacion ul {
 	display: flex;

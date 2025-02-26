@@ -19,6 +19,8 @@ from django.urls import path, include
 from Proyecto_SENA import views
 from django.conf import settings
 from django.conf.urls.static import static
+from Proyecto_SENA.views import catalogo
+from Proyecto_SENA.views import api_productos
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,7 +30,8 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('register/', views.register, name='register'),
     path('perfil/', views.perfil, name='perfil'),
-    path('catalogo/', views.catalogo, name='catalogo'),
+    path('catalogo/',catalogo, name='catalogo'),
+    path('api/productos/', api_productos, name='api_productos'),
     path('logout/', views.logout_perfil, name='logout'),
     path('api/productos/', views.get_products, name='get_products'),
     path('contact/', views.contact, name='contact'),
