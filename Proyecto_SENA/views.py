@@ -137,7 +137,7 @@ def get_products(request):
             producto['available_units'] = 0
     
     return JsonResponse(productos_list, safe=False)
-
+from django.core.mail import send_mail
 def contact(request):
     """
     Vista para procesar el formulario de contacto.
@@ -146,9 +146,10 @@ def contact(request):
     if request.method == 'POST':
         form = FormularioContacto(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Mensaje enviado")
-            return redirect('contact')
+            contact = form.save() 
+            messages.success(request, "Mensaje enviado") 
+            form.send_mail() 
+            return redirect('contact')  
         else:
             for field in form.errors:
                 for error in form[field].errors:
@@ -236,6 +237,7 @@ def pasarela(request):
                                 precio_unitario=Decimal(str(item['precio'])),
                                 subtotal=Decimal(str(item['precio'])) * cantidad
                             )
+                            form.send_mail() 
                         else:
                             return JsonResponse({
                                 'status': 'error',
@@ -261,6 +263,7 @@ def pasarela(request):
                     'redirect': 'historial/'
                 })
             
+            
             except Producto.DoesNotExist:
                 return JsonResponse({
                     'status': 'error',
@@ -271,6 +274,7 @@ def pasarela(request):
                 'status': 'error',
                 'errors': form.errors
             })
+
 
     form = FormularioPasarela(initial=get_datos(request.user))
     return render(request, 'pasarela.html', {

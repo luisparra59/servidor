@@ -120,7 +120,7 @@
             </div>
 
             <div class="contact-form">
-                <form action="{% url 'contact' %}" method="POST" class="datos" autocomplete="off">
+                <form action="{% url 'contact' %}" method="POST" class="datos" >
                     {% csrf_token %}
                     <h3 class="titulo-con">Datos básicos</h3>
                     <div class="input-contenedor-contacto">

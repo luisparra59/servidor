@@ -2,6 +2,10 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import PerfilUsuario, Contacto, Pedido
+from django.core.mail import send_mail
+from django.conf import settings
+
+
 
 class FormularioRegistroUsuario(UserCreationForm):
     """
@@ -63,6 +67,19 @@ class FormularioContacto(forms.ModelForm):
     class Meta:
         model = Contacto
         fields = ('nombre', 'email', 'telefono', 'mensaje')
+
+    def send_mail(self):
+        """Método para enviar el correo con la sugerencia"""
+        asunto = "Nueva Sugerencia Recibida"
+        mensaje = (
+            f"Has recibido una nueva sugerencia de {self.cleaned_data['nombre']} ({self.cleaned_data['email']}):\n\n"
+            f"Mensaje del cliente: \n{self.cleaned_data['mensaje']}\n\n"
+            f"Para contactar al usuario, llamar al número {self.cleaned_data['telefono']}\n"
+            f"O enviale un correo {self.cleaned_data['email']}"
+        )
+        destinatario = "TiendaLuigui1@gmail.com"
+
+        send_mail(asunto, mensaje, settings.EMAIL_HOST_USER, [destinatario])
 
 class FormularioPasarela(forms.ModelForm):
     """
@@ -137,3 +154,15 @@ class FormularioPasarela(forms.ModelForm):
             if not telefono:
                 self.add_error('telefono', 'El número de teléfono es obligatorio para pagos por Nequi o DaviPlata')
         return datos_limpios
+    
+    def send_mail(self):
+        """Método para enviar el correo con la sugerencia"""
+        asunto = "Nueva Orden de pedido Recibida"
+        mensaje = (
+            f"Has recibido una nueva orden sugerencia de {self.cleaned_data['nombre']} ({self.cleaned_data['email']}):\n\n"
+            f"Cliente: \n{self.cleaned_data['nombre']} {self.cleaned_data['apellido']}\n\n"
+            f"Para mas detalles del pedido, revisa porfavor el administrador/pedidos"
+        )
+        destinatario = "TiendaLuigui1@gmail.com"
+
+        send_mail(asunto, mensaje, settings.EMAIL_HOST_USER, [destinatario])
