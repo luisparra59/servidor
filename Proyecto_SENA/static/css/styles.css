@@ -148,7 +148,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #1abc9c;
+    background-color: #64b3f4;
     position: absolute;
     align-content: center;
 }
@@ -159,7 +159,7 @@
 }
 
 .bajar:hover {
-    background-color: #047245;
+    background-color: #000;
     transition: 1s;
 }
 
@@ -215,14 +215,15 @@
 
 .mas-info {
     padding: 15px 35px;
-    background-color: #1abc9c;
-    color: #000;
+    background-color: #64b3f4;
+    color: #fff;
     font-weight: 800;
     border-radius: 50px;
 }
 
 .mas-info:hover {
-    background-color: #64b3f4;
+    background-color: #000;
+    color: #fff;
     transition: 1s;
 }
 
@@ -257,7 +258,7 @@
 }
 
 .contact-form {
-    background-color: #1abc9c;
+    background-color: #64b3f4;
     position: relative;
 }
 
@@ -265,7 +266,7 @@
     position: absolute;
     width: 26px;
     height: 26px;
-    background-color: #1abc9c;
+    background-color: #64b3f4;
     transform: rotate(45deg);
     top: 50px;
     left: -13px;
@@ -292,7 +293,7 @@
 .input {
     width: 100%;
     outline: none;
-    border: 2px solid #fafafa;
+    border: 2px solid #fff;
     background: none;
     padding: 0.6rem 1.2rem;
     color: #fff;
@@ -315,7 +316,7 @@ textarea.input {
     background-color: #fff;
     border: 2px solid #fafafa;
     font-size: 0.95rem;
-    color: #1abc9c;
+    color: #64b3f4;
     line-height: 1;
     border-radius: 25px;
     outline: none;
