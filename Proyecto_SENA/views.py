@@ -19,6 +19,7 @@ from django.contrib.staticfiles import finders
 import os
 from .models import Producto
 from django.db import models 
+from django.contrib.auth.decorators import login_required
 
 def inicio(request):
     """Vista para la página de inicio"""
@@ -298,6 +299,7 @@ def pasarela(request):
                 # Crear registro en el historial
                 HistorialPedidos.objects.create(
                     usuario=request.user,
+                    pedido=pedido,
                     numero_pedido=f"#{pedido.id}",
                     numero_productos=sum(int(item['cantidad']) for item in carrito),
                     compra_total=pedido.total
@@ -398,19 +400,49 @@ def MessagePasarela(request):
             })
 
 @login_required
+@login_required
 def history(request):
     """
     Vista para mostrar el historial de pedidos del usuario.
     Incluye paginación para mejor navegación.
     """
-    pedidos = HistorialPedidos.objects.filter(usuario=request.user).order_by('-fecha_compra')
-    paginator = Paginator(pedidos, 10)
+    # Obtener historial de pedidos
+    pedidos_historial = HistorialPedidos.objects.filter(usuario=request.user).order_by('-fecha_compra')
     
+    # Para cada historial, buscar el pedido relacionado y sus productos
+    for pedido_historial in pedidos_historial:
+        # Extraer el ID del pedido del número de pedido
+        try:
+            pedido_id = pedido_historial.numero_pedido.replace('#', '')
+            pedido = Pedido.objects.filter(id=pedido_id).first()
+            
+            # Asociar el pedido al objeto de historial (no lo guarda en BD, solo en memoria)
+            if pedido:
+                # Crear un atributo temporal
+                pedido_historial.pedido = pedido
+            else:
+                # Si no se encuentra el pedido, crear un objeto vacío para evitar errores
+                class EmptyPedido:
+                    def __init__(self):
+                        self.items = []
+                
+                pedido_historial.pedido = EmptyPedido()
+                pedido_historial.pedido.items = Pedido.objects.none()
+        except (ValueError, Pedido.DoesNotExist):
+            # En caso de error, también crear un objeto vacío
+            class EmptyPedido:
+                def __init__(self):
+                    self.items = []
+            
+            pedido_historial.pedido = EmptyPedido()
+            pedido_historial.pedido.items = Pedido.objects.none()
+    
+    # Paginación
+    paginator = Paginator(pedidos_historial, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'historial.html', {'page_obj': page_obj})
-
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
