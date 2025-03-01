@@ -308,7 +308,7 @@ def pasarela(request):
                 return JsonResponse({
                     'status': 'success',
                     'message': 'Pedido creado, espere confirmación por correo',
-                    'redirect': 'historial/'
+                    'redirect': '/historial/'
                 })
             
             
@@ -390,7 +390,7 @@ def MessagePasarela(request):
             return JsonResponse({
                 'status': 'success',
                 'message': 'Pedido confirmado. Revisa tu correo.',
-                'redirect': '/catalogo/'
+                'redirect': '/historial/'
             })
             
         except Exception as e:
@@ -406,22 +406,16 @@ def history(request):
     Vista para mostrar el historial de pedidos del usuario.
     Incluye paginación para mejor navegación.
     """
-    # Obtener historial de pedidos
     pedidos_historial = HistorialPedidos.objects.filter(usuario=request.user).order_by('-fecha_compra')
     
-    # Para cada historial, buscar el pedido relacionado y sus productos
     for pedido_historial in pedidos_historial:
-        # Extraer el ID del pedido del número de pedido
         try:
             pedido_id = pedido_historial.numero_pedido.replace('#', '')
             pedido = Pedido.objects.filter(id=pedido_id).first()
-            
-            # Asociar el pedido al objeto de historial (no lo guarda en BD, solo en memoria)
+
             if pedido:
-                # Crear un atributo temporal
                 pedido_historial.pedido = pedido
             else:
-                # Si no se encuentra el pedido, crear un objeto vacío para evitar errores
                 class EmptyPedido:
                     def __init__(self):
                         self.items = []
@@ -429,7 +423,6 @@ def history(request):
                 pedido_historial.pedido = EmptyPedido()
                 pedido_historial.pedido.items = Pedido.objects.none()
         except (ValueError, Pedido.DoesNotExist):
-            # En caso de error, también crear un objeto vacío
             class EmptyPedido:
                 def __init__(self):
                     self.items = []
@@ -443,6 +436,7 @@ def history(request):
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'historial.html', {'page_obj': page_obj})
+
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
