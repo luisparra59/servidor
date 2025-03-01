@@ -5,10 +5,101 @@ document.addEventListener("DOMContentLoaded", function () {
     let productos = [];
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     
-    // Elementos del DOM para la búsqueda
+    // Elementos del DOM
+    const modal = document.getElementById("productModal");
+    const quantityInput = document.getElementById("quantity");
+    const addToCartBtn = document.getElementById("addToCartBtn");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
     const searchForm = document.querySelector("form[role='search']");
+    const procederBtn = document.getElementById("proceder-al-pedido");
+
+    // Función para resetear el modal y el scroll
+    function resetModalAndScroll() {
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+    }
+
+    // Configuración del botón "Proceder al pedido"
+    if (procederBtn) {
+        procederBtn.addEventListener("click", function(e) {
+            e.preventDefault(); // Prevenir comportamiento predeterminado
+            
+            // Enviar datos del pedido mediante fetch o lo que estés usando actualmente
+            fetch('/api/pedidos/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Incluir token CSRF si lo estás usando
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    // Los datos del pedido que estés enviando actualmente
+                    // Aquí debes incluir todos los datos necesarios para el pedido
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Error al procesar el pedido');
+            })
+            .then(data => {
+                // Mostrar un modal de confirmación similar al de la imagen
+                // Pero al hacer clic en "Aceptar", redirigirá al historial de compras
+                
+                const confirmModalHTML = `
+                    <div class="modal fade" id="confirmacionPedidoModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content bg-dark text-white">
+                                <div class="modal-body p-4 text-center">
+                                    <h5>mysite.com:8000 dice</h5>
+                                    <p class="my-3">Pedido realizado con éxito, espere confirmación por correo electrónico</p>
+                                    <button type="button" class="btn btn-primary" id="btnAceptarConfirmacion">Aceptar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                
+                // Insertar el modal en el DOM
+                document.body.insertAdjacentHTML('beforeend', confirmModalHTML);
+                
+                // Mostrar el modal
+                const confirmModal = new bootstrap.Modal(document.getElementById('confirmacionPedidoModal'));
+                confirmModal.show();
+                
+                // Configurar el botón Aceptar
+                document.getElementById('btnAceptarConfirmacion').addEventListener('click', function() {
+                    confirmModal.hide();
+                    setTimeout(() => {
+                        // Redireccionar al historial de compras
+                        window.location.href = 'historial/';
+                        
+                        // Limpiar el carrito después de la compra exitosa
+                        localStorage.removeItem("carrito");
+                    }, 150);
+                });
+                
+                // También manejar el evento de cierre del modal
+                document.getElementById('confirmacionPedidoModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove(); // Eliminar el modal del DOM
+                    
+                    // Redireccionar al historial de compras
+                    window.location.href = '/historial/';
+                    
+                    // Limpiar el carrito después de la compra exitosa
+                    localStorage.removeItem("carrito");
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Hubo un error al procesar tu pedido. Por favor intenta de nuevo.');
+            });
+        });
+    }
 
     // Añadir evento para el formulario de búsqueda
     if (searchForm) {
@@ -201,19 +292,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Configuración del modal y otros eventos del carrito
-    const modal = document.getElementById("productModal");
-    const quantityInput = document.getElementById("quantity");
-    const addToCartBtn = document.getElementById("addToCartBtn");
-
-    function resetModalAndScroll() {
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        backdrops.forEach(backdrop => backdrop.remove());
-    }
-
+    // Configuración del modal
     if (modal) {
         modal.addEventListener("show.bs.modal", function (event) {
             const button = event.relatedTarget;
@@ -244,6 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Configurar botón de agregar al carrito
     if (addToCartBtn) {
         addToCartBtn.addEventListener("click", function () {
             const id = modal.getAttribute("data-product-id");
@@ -326,8 +406,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // SOLUCIÓN PARA LOS BOTONES DE INCREMENTO/DECREMENTO
+    
+    // Configurar botón de decremento (con técnica de clonación para eliminar eventos previos)
     if (document.getElementById("decrementBtn")) {
-        document.getElementById("decrementBtn").addEventListener("click", () => {
+        const decrementBtn = document.getElementById("decrementBtn");
+        const newDecrementBtn = decrementBtn.cloneNode(true);
+        decrementBtn.parentNode.replaceChild(newDecrementBtn, decrementBtn);
+        
+        newDecrementBtn.addEventListener("click", () => {
             const currentVal = parseInt(quantityInput.value);
             if (currentVal > 1) {
                 quantityInput.value = currentVal - 1;
@@ -335,8 +422,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Configurar botón de incremento (con técnica de clonación para eliminar eventos previos)
     if (document.getElementById("incrementBtn")) {
-        document.getElementById("incrementBtn").addEventListener("click", () => {
+        const incrementBtn = document.getElementById("incrementBtn");
+        const newIncrementBtn = incrementBtn.cloneNode(true);
+        incrementBtn.parentNode.replaceChild(newIncrementBtn, incrementBtn);
+        
+        newIncrementBtn.addEventListener("click", () => {
             const currentVal = parseInt(quantityInput.value);
             const stock = parseInt(modal.getAttribute("data-stock"));
             if (currentVal < stock) {
@@ -345,6 +437,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert(`No puedes agregar más unidades. Stock disponible: ${stock}`);
             }
         });
+    }
+
+    // Función auxiliar para obtener el token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
     // Cargar productos al inicio

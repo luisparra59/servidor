@@ -415,6 +415,17 @@ textarea.input {
         font-size: 3.5rem;
     }
 }
+@media(min-width: 1610px) {
+    section {
+        padding: 70px 7% 80px;
+    }
+    .inicio {
+        height: 60vh;
+    }
+    .inicio-text h1{
+        font-size: 3.5rem;
+    }
+}
 
 @media(max-width: 1500px) {
     .inicio {
