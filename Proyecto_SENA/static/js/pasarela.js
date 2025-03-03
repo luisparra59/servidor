@@ -198,12 +198,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Funciones para la pantalla de carga
+    function mostrarPantallaCarga() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    function ocultarPantallaCarga() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+    
     // Configurar validación y envío del formulario
     function configurarFormulario() {
         const formPasarela = document.getElementById('form-pasarela');
+        const btnProceder = document.querySelector('.btn-proceder');
         
         formPasarela.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Verificar si el botón está deshabilitado (evita múltiples envíos)
+            if (btnProceder.disabled) {
+                return;
+            }
             
             // Verificar si hay productos en el carrito
             const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
@@ -235,6 +258,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            // Mostrar pantalla de carga
+            mostrarPantallaCarga();
+            
+            // Deshabilitar el botón para evitar múltiples envíos
+            btnProceder.disabled = true;
+            btnProceder.classList.add('disabled');
+            btnProceder.textContent = 'Procesando...';
+            
             // Actualizar datos del carrito en el formulario
             document.getElementById('carrito_data').value = JSON.stringify(carrito);
             
@@ -253,14 +284,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await response.json();
                 
+                // Ocultar pantalla de carga
+                ocultarPantallaCarga();
+                
                 if (data.status === 'success') {
                     localStorage.removeItem('carrito'); // Limpiar carrito
                     alert('Pedido realizado con éxito, espere confirmación por correo electrónico');
                     window.location.href = data.redirect || '/historial/';
                 } else {
+                    // Restaurar el botón
+                    btnProceder.disabled = false;
+                    btnProceder.classList.remove('disabled');
+                    btnProceder.textContent = 'Proceder al pedido';
+                    
                     alert(data.message || 'Error al procesar la orden');
                 }
             } catch (error) {
+                // Ocultar pantalla de carga
+                ocultarPantallaCarga();
+                
+                // Restaurar el botón
+                btnProceder.disabled = false;
+                btnProceder.classList.remove('disabled');
+                btnProceder.textContent = 'Proceder al pedido';
+                
                 console.error('Error al procesar el pedido:', error);
                 alert('Hubo un error al procesar tu pedido.');
             }
@@ -275,13 +322,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const fileContainer = fileInput.closest('.file-upload-container');
             
             fileInput.addEventListener('change', function() {
-                if (fileNameDisplay) {
-                    if (this.files.length > 0) {
-                        fileNameDisplay.textContent = this.files[0].name;
-                        fileContainer.classList.add('file-selected');
-                    } else {
-                        fileContainer.classList.remove('file-selected');
+                if (this.files && this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    console.log('Archivo seleccionado:', fileName);
+                    
+                    // Verificar si ya existe un elemento para mostrar el nombre
+                    let fileNameDisplay = fileContainer.querySelector('.file-name-display');
+                    
+                    if (!fileNameDisplay) {
+                        // Crear el elemento si no existe
+                        fileNameDisplay = document.createElement('div');
+                        fileNameDisplay.className = 'file-name-display';
+                        fileContainer.appendChild(fileNameDisplay);
                     }
+                    
+                    fileNameDisplay.textContent = fileName;
+                    fileContainer.classList.add('file-selected');
                 }
             });
         }

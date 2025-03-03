@@ -178,7 +178,7 @@ class HistorialPedidos(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, null=True, blank=True)  # Permite valores nulos temporalmente
     fecha_compra = models.DateTimeField(auto_now_add=True)
     numero_productos = models.IntegerField()
-    compra_total = models.DecimalField(max_digits=10, decimal_places=2)
+    compra_total = models.DecimalField(max_digits=10, decimal_places=0)
     numero_pedido = models.CharField(max_length=10)
 
     def __str__(self):

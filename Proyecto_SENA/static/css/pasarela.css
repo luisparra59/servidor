@@ -4,6 +4,15 @@
     padding: 0 20px;
 }
 
+.titulo-pasarela {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+    font-weight: 700;
+    margin-top: 100px;
+}
+
+
 .pasarela-contenedor h2 {
     text-align: center;
     color: #333;
@@ -74,6 +83,146 @@
     flex-direction: column;
     gap: 12px;
     padding: 0.5rem 0;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-dialog {
+    position: relative;
+    margin: 10% auto;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    border-radius: 5px;
+    padding: 0;
+    border: 1px solid #888;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+    font-weight: 500;
+}
+
+.btn-close {
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.modal-footer {
+    padding: 15px;
+    border-top: 1px solid #e9ecef;
+    text-align: right;
+}
+
+.qr-image {
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+/* Ocultar elementos */
+.d-none {
+    display: none !important;
+}
+
+/* Estilo para el botón */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+#qr-container {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    text-align: center;
+}
+
+#qr-container img {
+    max-width: 250px;
+    margin: 10px auto;
+}
+
+#loading-screen {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+}
+
+.loading-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #1abc9c;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 20px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.disabled {
+    opacity: 0.7;
+    cursor: not-allowed !important;
 }
 
 .form-check {
