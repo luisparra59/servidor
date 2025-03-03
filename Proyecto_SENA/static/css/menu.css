@@ -119,21 +119,6 @@ header {
 
 
 /* footer */
-/* .pie-pagina {
-	background-color: var(--color-primario);
-}
-
-.contenedor-pie-pagina {
-	display: flex;
-	flex-direction: column;
-	gap: 4rem;
-	padding: 3rem;
-}
-
-.menu-pie-pagina {
-	display: flex;
-	justify-content: space-around;
-} */
 
 .pie-pagina {
     background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
