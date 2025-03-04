@@ -95,10 +95,6 @@ def logout_perfil(request):
     return redirect('inicio')
 
 def register(request):
-    """
-    Vista para el registro de nuevos usuarios.
-    Procesa el formulario de registro y crea nuevas cuentas.
-    """
     if request.method == "POST":
         form = FormularioRegistroUsuario(request.POST)
         if form.is_valid():
@@ -106,12 +102,17 @@ def register(request):
             messages.success(request, "Registro exitoso, Por favor inicia sesión")
             return redirect('login')
         else:
+            # Esto mantendrá los datos previamente ingresados
             for field in form.errors:
                 for error in form[field].errors:
                     messages.error(request, f"{field}: {error}")
     else:
         form = FormularioRegistroUsuario()
-    return render(request, 'register.html', {'register_mode': True, 'form': form})
+    
+    return render(request, 'register.html', {
+        'register_mode': True, 
+        'form': form,  # Formulario con datos previos
+    })
 
 def login(request):
     """
