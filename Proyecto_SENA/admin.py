@@ -3,6 +3,7 @@ from .models import (
     PerfilUsuario, Producto, Contacto, Pedido,
     ProductosPedido, Inventario
 )
+from django.utils.safestring import mark_safe
 
 class AdminPerfilUsuario(admin.ModelAdmin):
     """
@@ -46,9 +47,19 @@ class AdminPedido(admin.ModelAdmin):
     """
     Configuración de la interfaz administrativa para pedidos.
     """
-    list_display = ['id', 'usuario', 'fecha_creacion', 'total', 'estado', 'metodo_pago']
+    list_display = ('id', 'usuario', 'fecha_creacion', 'total', 'estado', 'metodo_pago', 'tiene_comprobante')
     inlines = [ProductosPedidoInline]
-    readonly_fields = ['fecha_creacion', 'subtotal', 'total']
+    
+    def tiene_comprobante(self, obj):
+        return bool(obj.comprobante_pago)
+    tiene_comprobante.boolean = True
+    tiene_comprobante.short_description = 'Comprobante'
+    
+    def mostrar_comprobante(self, obj):
+        if obj.comprobante_pago:
+            return mark_safe(f'<img src="{obj.comprobante_pago.url}" width="300" />')
+        return "No hay comprobante"
+    mostrar_comprobante.short_description = 'Comprobante de Pago'
 
 @admin.register(Inventario)
 class AdminInventario(admin.ModelAdmin):

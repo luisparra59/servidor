@@ -141,9 +141,17 @@ class FormularioPasarela(forms.ModelForm):
         })
     )
 
+    comprobante_pago = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*'
+        })
+    )
+
     class Meta:
         model = Pedido
-        fields = ['nombre', 'apellido', 'email', 'telefono', 'direccion', 'municipio', 'metodo_pago']
+        fields = ['nombre', 'apellido', 'email', 'telefono', 'direccion', 'municipio', 'metodo_pago', 'comprobante_pago']
 
     def clean(self):
         datos_limpios = super().clean()

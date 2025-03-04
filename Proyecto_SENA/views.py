@@ -245,7 +245,7 @@ def pasarela(request):
     Maneja la creación de pedidos y sus productos asociados.
     """
     if request.method == 'POST':
-        form = FormularioPasarela(request.POST)
+        form = FormularioPasarela(request.POST,  request.FILES)
         if form.is_valid():
             try:
                 carrito_data = request.POST.get('carrito_data')
@@ -311,7 +311,6 @@ def pasarela(request):
                     'redirect': '/historial/'
                 })
             
-            
             except Producto.DoesNotExist:
                 return JsonResponse({
                     'status': 'error',
@@ -331,75 +330,83 @@ def pasarela(request):
 
 def MessagePasarela(request):
     """
-    Vista para enviar correos de confirmación de pedido.
-    Procesa los datos del pedido y envía un correo al cliente.
+    Vista para enviar correos de confirmación de pedido y guardar el pedido.
     """
     if request.method == "POST":
-        try:
-            nombre = request.POST.get('nombre')
-            apellido = request.POST.get('apellido')
-            email = request.POST.get('email')
-            telefono = request.POST.get('telefono')
-            direccion = request.POST.get('direccion')
-            metodo_pago = request.POST.get('metodo_pago')
-            carrito_data = request.POST.get('carrito_data')
-            
-            productos = json.loads(carrito_data) if carrito_data else []
-            
-            for producto in productos:
-                producto['subtotal'] = float(producto['precio']) * int(producto['cantidad'])
-            
-            subtotal = sum(float(item['precio']) * int(item['cantidad']) for item in productos)
-            envio = 3000
-            total = subtotal + envio
-            
-            template = render_to_string('email_template.html', {
-                'nombre': nombre,
-                'apellido': apellido,
-                'email': email,
-                'telefono': telefono,
-                'direccion': direccion,
-                'metodo_pago': metodo_pago,
-                'productos': productos,
-                'subtotal': f"{subtotal:,.0f}",
-                'envio': f"{envio:,.0f}",
-                'total': f"{total:,.0f}"
-            })
-            
-            email_message = EmailMessage(
-                'Confirmación de pedido - Tienda Luigui',
-                template,
-                settings.EMAIL_HOST_USER,
-                [email]
-            )
-
-            if metodo_pago == 'nequi':
-                qr_path = finders.find('images/QR-Nequi.jpg')
-                if qr_path:
-                    with open(qr_path, 'rb') as f:
-                        email_message.attach('qr_nequi.jpg', f.read(), 'image/png')
-            elif metodo_pago == 'daviplata':
-                qr_path = finders.find('images/QR-DaviPlata.jpg')
-                if qr_path:
-                    with open(qr_path, 'rb') as f:
-                        email_message.attach('qr_daviplata.jpg', f.read(), 'image/webp')
-            
-            email_message.content_subtype = "html"
-            email_message.send()
-            
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Pedido confirmado. Revisa tu correo.',
-                'redirect': '/historial/'
-            })
-            
-        except Exception as e:
+        form = FormularioPasarela(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                # Procesar y crear pedido usando pasarela
+                response = pasarela(request)
+                
+                # Si hubo un error en pasarela, devolver la respuesta
+                if isinstance(response, JsonResponse):
+                    response_data = json.loads(response.content)
+                    if response_data.get('status') == 'error':
+                        return response
+                
+                # Obtener datos para el correo personalizado
+                nombre = request.POST.get('nombre')
+                apellido = request.POST.get('apellido')
+                email = request.POST.get('email')
+                telefono = request.POST.get('telefono')
+                direccion = request.POST.get('direccion')
+                metodo_pago = request.POST.get('metodo_pago')
+                
+                carrito = json.loads(request.POST.get('carrito_data'))
+                
+                for producto in carrito:
+                    producto['subtotal'] = float(producto['precio']) * int(producto['cantidad'])
+                
+                subtotal = sum(float(item['precio']) * int(item['cantidad']) for item in carrito)
+                envio = 3000
+                total = subtotal + envio
+                
+                template = render_to_string('email_template.html', {
+                    'nombre': nombre,
+                    'apellido': apellido,
+                    'email': email,
+                    'telefono': telefono,
+                    'direccion': direccion,
+                    'metodo_pago': metodo_pago,
+                    'productos': carrito,
+                    'subtotal': f"{subtotal:,.0f}",
+                    'envio': f"{envio:,.0f}",
+                    'total': f"{total:,.0f}"
+                })
+                
+                email_message = EmailMessage(
+                    'Confirmación de pedido - Tienda Luigui',
+                    template,
+                    settings.EMAIL_HOST_USER,
+                    [email]
+                )
+                
+                email_message.content_subtype = "html"
+                email_message.send()
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Pedido confirmado. Revisa tu correo.',
+                    'redirect': '/historial/'
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Error al procesar el pedido: {str(e)}'
+                })
+        else:
             return JsonResponse({
                 'status': 'error',
-                'message': f'Error al procesar el pedido: {str(e)}'
+                'errors': form.errors
             })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Método no permitido'
+    })
 
-@login_required
 @login_required
 def history(request):
     """

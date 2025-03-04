@@ -116,7 +116,7 @@ class Pedido(models.Model):
     Almacena toda la información necesaria para procesar un pedido.
     """
     METODOS_PAGO = [
-        ('contra-entrega', 'Pago contra entrega'),
+        ('bancolombia', 'Bancolombia'),
         ('nequi', 'Nequi'),
         ('daviplata', 'DaviPlata'),
     ]
@@ -143,7 +143,7 @@ class Pedido(models.Model):
     costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=3000)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=20, choices=ESTADOS_PEDIDO, default='pendiente')
-
+    comprobante_pago = models.ImageField(upload_to='comprobantes/', null=True, blank=True, verbose_name="Comprobante de pago")
     def __str__(self):
         return f"Pedido #{self.id} - {self.usuario.username}"
 
@@ -178,7 +178,7 @@ class HistorialPedidos(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, null=True, blank=True)  # Permite valores nulos temporalmente
     fecha_compra = models.DateTimeField(auto_now_add=True)
     numero_productos = models.IntegerField()
-    compra_total = models.DecimalField(max_digits=10, decimal_places=2)
+    compra_total = models.DecimalField(max_digits=10, decimal_places=0)
     numero_pedido = models.CharField(max_length=10)
 
     def __str__(self):

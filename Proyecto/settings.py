@@ -46,36 +46,32 @@ INSTALLED_APPS = [
     'Proyecto_SENA',
 ]
 
-# Configuración mejorada de Jazzmin
 JAZZMIN_SETTINGS = {
     # Títulos y encabezados
     "site_title": "Tienda LuiGui",
     "site_header": "Tienda LuiGui Admin",
     "site_brand": "Tienda LuiGui",
-    "site_logo": "images/logo.png",
-    "login_logo": "images/logo.png",
+    "site_logo": None,  # Eliminamos el logo para usar solo texto
+    "login_logo": None,
     "login_logo_dark": None,
-    "site_logo_classes": "img-circle",
     "site_icon": "images/favicon.png",
     
     # Textos de bienvenida
-    "welcome_sign": "Bienvenido al Panel Administrativo de Tienda LuiGui",
+    "welcome_sign": "Bienvenido al Panel Administrativo",
     "copyright": "The Towers Development 2025",
     
     # Configuración del Avatar
     "user_avatar": None,
     
-    # Menú superior
+    # Menú superior - reducido para ahorrar espacio
     "topmenu_links": [
         {"name": "Sitio Web", "url": "/", "new_window": True},
-        {"name": "Panel Admin", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"model": "auth.User"},
-        {"name": "Soporte", "url": "https://github.com/your-repo/support", "new_window": True},
+        {"name": "Panel", "url": "admin:index", "permissions": ["auth.view_user"]},
     ],
     
-    # Menú lateral
+    # Menú lateral - más compacto
     "show_sidebar": True,
-    "navigation_expanded": True,
+    "navigation_expanded": False,  # Colapsado por defecto
     
     # Iconos personalizados
     "icons": {
@@ -84,7 +80,12 @@ JAZZMIN_SETTINGS = {
         "users.User": "fas fa-user",
         "auth.Group": "fas fa-users",
         "admin.LogEntry": "fas fa-file",
-        "Proyecto_SENA": "fas fa-shopping-cart",  
+        "Proyecto_SENA": "fas fa-shopping-cart",
+        "Proyecto_SENA.Contactos": "fas fa-address-book",
+        "Proyecto_SENA.Inventarios": "fas fa-clipboard-list",
+        "Proyecto_SENA.Pedidos": "fas fa-shopping-bag",
+        "Proyecto_SENA.Perfil_usuarios": "fas fa-id-card",
+        "Proyecto_SENA.Productos": "fas fa-box-open",
     },
     
     # Iconos por defecto
@@ -95,9 +96,56 @@ JAZZMIN_SETTINGS = {
     "related_modal_active": True,
     
     # Personalización UI
-    "custom_css": None,
+    "custom_css": """
+        /* Reducir tamaños de botones y espaciado */
+        .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Reducir espaciado en las tablas del panel */
+        .table td, .table th {
+            padding: 0.5rem;
+        }
+        
+        /* Hacer el menú lateral más compacto */
+        .nav-sidebar .nav-link {
+            padding: 0.4rem 1rem;
+        }
+        
+        /* Reducir el tamaño de los encabezados de las tarjetas */
+        .card-header {
+            padding: 0.5rem 1rem;
+        }
+        
+        /* Reducir el espacio entre elementos */
+        .card {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Hacer más compacto el menú lateral */
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link {
+            font-size: 0.9rem;
+        }
+        
+        /* Reducir tamaño de títulos */
+        .card-title {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+        
+        /* Organizar actividades recientes en fila */
+        .recent-actions-list {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .recent-actions-item {
+            flex: 1 1 200px;
+            max-width: 300px;
+            margin: 5px;
+        }
+    """,
     "custom_js": None,
-    "show_ui_builder": True,
     
     # Formato del formulario de cambio
     "changeform_format": "horizontal_tabs",
@@ -106,22 +154,65 @@ JAZZMIN_SETTINGS = {
         "auth.group": "vertical_tabs",
     },
     
-    # Acciones en el menú desplegable
-    "hide_apps": [],
-    "hide_models": [],
-    
     # Controles de UI
     "use_google_fonts_cdn": True,
-    "show_ui_builder": True,
+    "show_ui_builder": False,  # Desactivado para reducir distracciones
     
     # Enlaces rápidos en el dashboard
-    "search_model": ["auth.User", "Proyecto_SENA.YourMainModel"],
+    "search_model": ["auth.User", "Proyecto_SENA.Productos"],
     
     # Botones de acción personalizados
-    "actions_sticky": True,
+    "actions_sticky": False,  # Desactivado para ahorrar espacio
+    
+    # Diseño del panel de control
+    "order_with_respect_to": ["auth", "Proyecto_SENA", "Python Social Auth"],
 }
 
-# Mejora de la interfaz de usuario
+# Mejora de la interfaz de usuario con tema oscuro/gris y más compacto
+JAZZMIN_UI_TWEAKS = {
+    # Tamaño del texto - reducido
+    "navbar_small_text": True,
+    "footer_small_text": True,
+    "body_small_text": True,
+    "brand_small_text": True,
+    
+    # Colores y temas
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark bg-dark",
+    "no_navbar_border": True,
+    
+    # Diseño general - más compacto
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    
+    # Barra lateral - más compacta
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": True,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    
+    # Tema principal
+    "theme": "slate",
+    "dark_mode_theme": None,
+    
+    # Clases para botones - tamaños más pequeños
+    "button_classes": {
+        "primary": "btn-sm btn-primary",
+        "secondary": "btn-sm btn-secondary",
+        "info": "btn-sm btn-info",
+        "warning": "btn-sm btn-warning",
+        "danger": "btn-sm btn-danger",
+        "success": "btn-sm btn-success",
+    },
+}
+
+# Mejora de la interfaz de usuario con tema oscuro/gris
 JAZZMIN_UI_TWEAKS = {
     # Tamaño del texto
     "navbar_small_text": False,
@@ -129,10 +220,10 @@ JAZZMIN_UI_TWEAKS = {
     "body_small_text": False,
     "brand_small_text": False,
     
-    # Colores y temas
-    "brand_colour": "navbar-primary",
+    # Colores y temas - cambiado a oscuro/gris
+    "brand_colour": "navbar-dark",
     "accent": "accent-primary",
-    "navbar": "navbar-light",
+    "navbar": "navbar-dark bg-dark",
     "no_navbar_border": True,
     
     # Diseño general
@@ -141,8 +232,8 @@ JAZZMIN_UI_TWEAKS = {
     "footer_fixed": False,
     "sidebar_fixed": True,
     
-    # Barra lateral
-    "sidebar": "sidebar-light-primary",
+    # Barra lateral - cambiada a oscura
+    "sidebar": "sidebar-dark-primary",
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": True,
@@ -150,14 +241,14 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
     
-    # Tema principal - cambiado de "cyborg" (muy oscuro) a "default" (más claro)
-    "theme": "flatly",  
+    # Tema principal - cambiado a un tema más oscuro/gris
+    "theme": "slate",  
     "dark_mode_theme": None,
     
     # Clases para botones
     "button_classes": {
         "primary": "btn-primary",
-        "secondary": "btn-outline-secondary",
+        "secondary": "btn-secondary",
         "info": "btn-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
