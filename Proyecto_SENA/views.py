@@ -246,7 +246,7 @@ def pasarela(request):
     Maneja la creación de pedidos y sus productos asociados.
     """
     if request.method == 'POST':
-        form = FormularioPasarela(request.POST,  request.FILES)
+        form = FormularioPasarela(request.POST, request.FILES)
         if form.is_valid():
             try:
                 carrito_data = request.POST.get('carrito_data')
@@ -263,12 +263,17 @@ def pasarela(request):
                         'message': 'El carrito está vacío'
                     })
 
+                # Calcular subtotal
+                subtotal = Decimal(str(sum(Decimal(str(item['precio'])) * int(item['cantidad']) for item in carrito)))
+                costo_envio = Decimal('3000')
+                total = subtotal + costo_envio
+
                 # Crear el pedido
                 pedido = form.save(commit=False)
                 pedido.usuario = request.user
-                pedido.subtotal = Decimal(str(sum(Decimal(str(item['precio'])) * int(item['cantidad']) for item in carrito)))
-                pedido.costo_envio = Decimal('3000')
-                pedido.total = pedido.subtotal + pedido.costo_envio
+                pedido.subtotal = subtotal
+                pedido.costo_envio = costo_envio
+                pedido.total = total
                 pedido.save()
 
                 # Guardar productos del pedido
@@ -285,7 +290,6 @@ def pasarela(request):
                                 precio_unitario=Decimal(str(item['precio'])),
                                 subtotal=Decimal(str(item['precio'])) * cantidad
                             )
-                            form.send_mail() 
                         else:
                             return JsonResponse({
                                 'status': 'error',
@@ -297,13 +301,16 @@ def pasarela(request):
                             'message': f'No hay inventario para {producto.nombre}'
                         })
                 
+                # Enviar correo de confirmación
+                form.send_order_mail(carrito, total)
+                
                 # Crear registro en el historial
                 HistorialPedidos.objects.create(
                     usuario=request.user,
                     pedido=pedido,
                     numero_pedido=f"#{pedido.id}",
                     numero_productos=sum(int(item['cantidad']) for item in carrito),
-                    compra_total=pedido.total
+                    compra_total=total
                 )
 
                 return JsonResponse({
@@ -322,7 +329,6 @@ def pasarela(request):
                 'status': 'error',
                 'errors': form.errors
             })
-
 
     form = FormularioPasarela(initial=get_datos(request.user))
     return render(request, 'pasarela.html', {

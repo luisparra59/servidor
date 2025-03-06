@@ -52,17 +52,7 @@
             <p>Dirección: {{direccion}}</p>
             <p>Teléfono: {{telefono}}</p>
             <p>Email: {{email}}</p>
-            {% if metodo_pago == 'nequi' %}
-                <p>Método de pago: {{metodo_pago}}</p>
-                <p>Por favor escanea el código QR que encuentras al final de este correo adjunto para realizar el pago.</p>
-            {% elif metodo_pago == 'daviplata' %}
-                <p>Método de pago: {{metodo_pago}}</p>
-                <p>Por favor escanea el código QR que encuentras al final de este correo adjunto para realizar el pago.</p>
-            {% elif metodo_pago == 'contra-entrega' %}
-                <p>Método de pago: {{metodo_pago}}, pagale al repartidor cuando llegue</p>
-            {% else %}
-                <p>Método de pago: {{metodo_pago}}</p>
-            {% endif %}
+            <p>Método de pago: {{metodo_pago}}</p>
         </div>
 
         <div class="productos">

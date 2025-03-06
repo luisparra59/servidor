@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import PerfilUsuario, Contacto, Pedido
+from .models import PerfilUsuario, Contacto, Pedido, ProductosPedido
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -153,24 +153,33 @@ class FormularioPasarela(forms.ModelForm):
         model = Pedido
         fields = ['nombre', 'apellido', 'email', 'telefono', 'direccion', 'municipio', 'metodo_pago', 'comprobante_pago']
 
-    def clean(self):
-        datos_limpios = super().clean()
-        metodo_pago = datos_limpios.get('metodo_pago')
+    def send_order_mail(self, carrito, total):
+        """Método para enviar el correo con los detalles de la orden"""
+        asunto = "Nueva Orden de Pedido Recibida"
         
-        if metodo_pago in ['nequi', 'daviplata']:
-            telefono = datos_limpios.get('telefono')
-            if not telefono:
-                self.add_error('telefono', 'El número de teléfono es obligatorio para pagos por Nequi o DaviPlata')
-        return datos_limpios
-    
-    def send_mail(self):
-        """Método para enviar el correo con la sugerencia"""
-        asunto = "Nueva Orden de pedido Recibida"
+        # Formatear los productos del carrito
+        productos_detalle = []
+        for item in carrito:
+            productos_detalle.append(
+                f"Producto: {item['nombre']} - Cantidad: {item['cantidad']} - Precio: ${item['precio']:,.0f}"
+            )
+        
+        productos_texto = "\n".join(productos_detalle)
+        
         mensaje = (
-            f"Has recibido una nueva orden sugerencia de {self.cleaned_data['nombre']} ({self.cleaned_data['email']}):\n\n"
-            f"Cliente: \n{self.cleaned_data['nombre']} {self.cleaned_data['apellido']}\n\n"
-            f"Para mas detalles del pedido, revisa porfavor el administrador/pedidos"
+            f"Has recibido una nueva orden de {self.cleaned_data['nombre']} ({self.cleaned_data['email']}):\n\n"
+            f"Cliente: {self.cleaned_data['nombre']} {self.cleaned_data['apellido']}\n"
+            f"Método de pago: {self.cleaned_data['metodo_pago']}\n\n"
+            f"Productos comprados:\n{productos_texto}\n\n"
+            f"Total de la compra: ${total:,.0f}"
         )
+        
         destinatario = "TiendaLuigui1@gmail.com"
 
-        send_mail(asunto, mensaje, settings.EMAIL_HOST_USER, [destinatario])
+        send_mail(
+            asunto, 
+            mensaje, 
+            settings.EMAIL_HOST_USER, 
+            [destinatario],
+            fail_silently=False
+        )
